@@ -1,0 +1,13 @@
+import { Markdown, Meta } from '@storybook/addon-docs/blocks';
+import readme from '../../README.md?raw';
+
+export const repository =
+  // Relative links resolve against the repository, not against Storybook's own
+  // URL, so they would 404 here. Anchors and absolute URLs are left alone. The
+  // comment sits inside the statement because a standalone `{/* … */}` is an
+  // expression with nothing in it, which the MDX indexer cannot parse.
+  'https://github.com/tobia-codes/trailpack-ui/blob/main/packages/react/';
+
+<Meta title="Overview" />
+
+<Markdown>{readme.replace(/\]\((?!https?:|#)([^)]+)\)/g, `](${repository}$1)`)}</Markdown>

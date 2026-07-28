@@ -10,17 +10,24 @@ under the `@trailpack-ui` scope.
 | Package                                 | Description                                                             |
 | --------------------------------------- | ----------------------------------------------------------------------- |
 | [`@trailpack-ui/theme`](packages/theme) | Design token contract, light and dark theme, built with vanilla-extract |
+| [`@trailpack-ui/react`](packages/react) | React components, hooks and utilities, styled with those tokens         |
 
-Each package stands on its own: it carries its own build, lint, format and test
-setup and has no dependency on the others.
+Each package carries its own build, lint, format and test setup. `react` takes
+`theme` as a peer dependency — the only edge between them — so the two are
+released in step; everything else stands alone.
 
-`packages/theme` ships a Storybook documenting the tokens and when to use each
-one — `pnpm --filter @trailpack-ui/theme dev`.
+Both ship a Storybook: `packages/theme` documents the tokens and when to reach
+for each one, `packages/react` the components in light and dark.
+
+```sh
+pnpm --filter @trailpack-ui/theme dev  # :6006
+pnpm --filter @trailpack-ui/react dev  # :6007
+```
 
 ## Layout
 
 ```
-packages/*          publishable packages (currently: theme)
+packages/*          publishable packages (theme, react)
 apps/*              applications (none yet, but part of the workspace globs)
 .changeset/         pending changesets + config
 .github/workflows/  CI

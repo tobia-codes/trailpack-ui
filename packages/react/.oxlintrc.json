@@ -1,0 +1,14 @@
+{
+  "plugins": ["typescript", "unicorn", "import", "react"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "rules": {
+    "import/no-unassigned-import": "off",
+    // The automatic JSX runtime brings its own import; `React` in scope is a
+    // requirement of the classic transform, which nothing here uses.
+    "react/react-in-jsx-scope": "off"
+  }
+}

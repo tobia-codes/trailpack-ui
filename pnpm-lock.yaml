@@ -214,6 +214,54 @@ importers:
         specifier: ^2.10.7
         version: 2.10.7
 
+  packages/react:
+    devDependencies:
+      '@storybook/addon-docs':
+        specifier: ^10.5.4
+        version: 10.5.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(esbuild@0.28.1)(storybook@10.5.5(@types/react@19.2.17)(prettier@2.8.8)(react@19.2.8))(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1))
+      '@storybook/react-vite':
+        specifier: ^10.5.5
+        version: 10.5.5(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(esbuild@0.28.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(storybook@10.5.5(@types/react@19.2.17)(prettier@2.8.8)(react@19.2.8))(typescript@7.0.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1))
+      '@trailpack-ui/theme':
+        specifier: workspace:^
+        version: link:../theme
+      '@types/react':
+        specifier: ^19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      '@vanilla-extract/css':
+        specifier: ^1.21.2
+        version: 1.21.2
+      '@vanilla-extract/vite-plugin':
+        specifier: ^5.2.6
+        version: 5.2.6(@types/node@26.1.1)(esbuild@0.28.1)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1))
+      oxfmt:
+        specifier: ^0.60.0
+        version: 0.60.0
+      oxlint:
+        specifier: ^1.75.0
+        version: 1.75.0
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+      storybook:
+        specifier: ^10.5.5
+        version: 10.5.5(@types/react@19.2.17)(prettier@2.8.8)(react@19.2.8)
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vite:
+        specifier: ^8.1.5
+        version: 8.1.5(@types/node@26.1.1)(esbuild@0.28.1)
+      vitest:
+        specifier: ^4.0.18
+        version: 4.1.10(@types/node@26.1.1)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1))
+
   packages/theme:
     devDependencies:
       '@storybook/addon-docs':

@@ -11,9 +11,15 @@ Turborepo. Packages are versioned with Changesets and published to npm under the
 `@trailpack-ui` scope. See [README.md](README.md) for the layout and the command
 list.
 
-Packages here are **self-contained**: each owns its build, lint, format and test
-setup, and none depends on another. A shared config package is not the default —
-add one only when something is actually duplicated three times over.
+Each package owns its build, lint, format and test setup. The one edge between
+them is that `react` takes `theme` as a peer dependency; there is no shared
+config package, and one is not the default — add it only when something is
+actually duplicated three times over.
+
+`packages/react` has [its own AGENTS.md](packages/react/AGENTS.md). Read it
+before changing anything there: whether a module carries `'use client'` decides
+what lands in a consumer's client bundle, and it is easy to get wrong in a way
+nothing complains about.
 
 ## Environment
 

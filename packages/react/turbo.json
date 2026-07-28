@@ -1,0 +1,11 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    // `boundaries.test.ts` reads `dist/`, so this package's own build has to
+    // run first — the root task only waits for the dependencies' builds.
+    "test": {
+      "dependsOn": ["build"]
+    }
+  }
+}
