@@ -1,4 +1,4 @@
-# tokens
+# theme
 
 Which design token to reach for, when styling anything against
 `@trailpack-ui/theme`.
@@ -38,3 +38,7 @@ in both themes.
 
 So the guidance here cannot disagree with the reference, the stories, or the
 tokens themselves. Edit `guidance.ts`, never these files.
+
+This directory is also the copy agents working on the monorepo itself read:
+`.claude/skills/theme/` at the repository root is a pointer to it, not a second
+copy.

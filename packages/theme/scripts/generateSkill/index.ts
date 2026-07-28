@@ -5,17 +5,18 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import {
-  catalogMetadataPath,
-  catalogSkillPath,
+  metadataPath,
+  pointerPath,
   renderMetadata,
+  renderPointer,
   renderSkill,
   skillPath,
 } from './generateSkill.ts';
 
 const outputs = [
   [skillPath, renderSkill()],
-  [catalogSkillPath, renderSkill()],
-  [catalogMetadataPath, renderMetadata()],
+  [metadataPath, renderMetadata()],
+  [pointerPath, renderPointer()],
 ] as const;
 
 for (const [path, contents] of outputs) {

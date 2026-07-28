@@ -1,6 +1,6 @@
 /**
- * Renders `src/guidance.ts` into the agent skill, in both places it is served
- * from. Written by `index.ts`, run with `pnpm generate:skill`.
+ * Renders `src/guidance.ts` into the `theme` agent skill. Written by
+ * `index.ts`, run with `pnpm generate:skill`.
  *
  * The test beside this file fails if any committed output no longer matches, so
  * the guidance, the skill and its metadata cannot drift.
@@ -10,28 +10,29 @@ import type { GuidanceChapter } from '../../src/guidance.ts';
 import { guidance } from '../../src/guidance.ts';
 import { renderChapters } from '../lib/renderGuidance.ts';
 
-/** Loaded by Claude Code for work inside this repository. */
-export const skillPath = new URL('../../.claude/skills/tokens/SKILL.md', import.meta.url);
+/** The guidance itself, in the tool-neutral catalogue at the repository root. */
+export const skillPath = new URL('../../../../skills/theme/SKILL.md', import.meta.url);
+
+export const metadataPath = new URL('../../../../skills/theme/metadata.json', import.meta.url);
 
 /**
- * The repository-root catalogue, which is the copy a consumer of the package
- * finds. Byte-identical to the one above on purpose: two renderings of the same
- * guidance that differed would be worse than one that is duplicated.
+ * Where Claude Code discovers the skill for work in this repository. It points
+ * at the catalogue rather than repeating it — the guidance is long, and a
+ * second copy in the tree is a second thing that can go stale.
+ *
+ * At the root rather than under `packages/theme`, because a directory-scoped
+ * skill only applies to files beneath it and this one is needed in
+ * `packages/react` just as much.
  */
-export const catalogSkillPath = new URL('../../../../skills/tokens/SKILL.md', import.meta.url);
-
-export const catalogMetadataPath = new URL(
-  '../../../../skills/tokens/metadata.json',
-  import.meta.url,
-);
+export const pointerPath = new URL('../../../../.claude/skills/theme/SKILL.md', import.meta.url);
 
 const frontmatter = `---
-name: tokens
+name: theme
 description: >-
-  Use when writing or reviewing UI code in a project that depends on
-  @trailpack-ui/theme — picking colours, spacing, radii, type, shadows, icon
-  sizes, focus rings or stacking order. Says which token to reach for and why,
-  so components stay correct in both the light and the dark theme.
+  Use when writing or reviewing UI code against @trailpack-ui/theme — picking
+  colours, spacing, radii, type, shadows, icon sizes, focus rings or stacking
+  order. Says which token to reach for and why, so components stay correct in
+  both the light and the dark theme.
 ---`;
 
 const preamble = `# Trailpack design tokens
@@ -87,6 +88,27 @@ export const renderSkill = () => {
 };
 
 /**
+ * Generated rather than hand-written only so that it cannot answer to a
+ * different `description` than the guidance it forwards to.
+ */
+export const renderPointer = () => {
+  const generated =
+    '<!-- Generated from packages/theme/src/guidance.ts by `pnpm generate:skill`. Do not edit. -->';
+
+  const body = `# Trailpack design tokens
+
+The guidance lives in [\`skills/theme/SKILL.md\`](../../../skills/theme/SKILL.md),
+the tool-neutral catalogue this repository publishes. **Read it now** — it is
+the whole skill, and this file is only how Claude Code finds it.
+
+It is written for anyone building against \`@trailpack-ui/theme\`, so it applies
+unchanged in \`packages/react\`, in \`packages/theme\` itself, and in a consumer's
+application.`;
+
+  return `${[frontmatter, generated, body].join('\n\n')}\n`;
+};
+
+/**
  * The range of `@trailpack-ui/theme` this guidance describes. Below 1.0 a minor
  * bump is the breaking one, so that is where the range has to close.
  */
@@ -107,7 +129,7 @@ export const renderMetadata = () => {
 
   return `${JSON.stringify(
     {
-      name: 'tokens',
+      name: 'theme',
       package: pkg.name,
       packageVersion: compatibleRange(pkg.version),
       organization: 'Trailpack',

@@ -32,13 +32,14 @@ Several things about it are easy to break:
   tables, `generated/TOKENS.md` and the agent skill are all renderings of it,
   the last two through the shared functions in `scripts/lib/renderGuidance.ts`.
   Never edit a generated file by hand.
-- **`generate:skill` writes outside this package.** Besides
-  `.claude/skills/tokens/SKILL.md` it produces `skills/tokens/SKILL.md` and
-  `skills/tokens/metadata.json` at the _repository root_ — the tool-neutral
-  catalogue described in [`skills/README.md`](../../skills/README.md). A change
-  to `guidance.ts` therefore shows up in a diff two levels up, which is
-  intended; `metadata.json` also picks up this package's `version`, so a release
-  moves it with no edit.
+- **`generate:skill` writes only outside this package.** It produces
+  `skills/theme/SKILL.md` and `skills/theme/metadata.json` at the _repository
+  root_ — the tool-neutral catalogue described in
+  [`skills/README.md`](../../skills/README.md) — plus the pointer at
+  `.claude/skills/theme/SKILL.md` that Claude Code loads. A change to
+  `guidance.ts` therefore shows up in a diff two levels up, which is intended;
+  `metadata.json` also picks up this package's `version`, so a release moves it
+  with no edit.
 - **`pnpm generate` runs both generators**, and every output has a test that
   fails if the committed copy is stale. So a new token means the token, the
   guidance and one command — in the same change, or the reference silently

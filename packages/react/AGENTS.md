@@ -53,10 +53,10 @@ configuration they belong to.
 ## Styling
 
 **Which token to reach for is answered by the
-[`tokens` skill](../theme/.claude/skills/tokens/SKILL.md).** It sits in the theme
-package, so a directory-scoped tool will not surface it while you are working
-here — open it anyway; this is the package where those decisions are actually
-made.
+[`theme` skill](../../skills/theme/SKILL.md).** It lives at the repository root
+rather than in either package, so it applies here as much as in
+`packages/theme` — which matters, because this is the package where those
+decisions are actually made.
 
 - Styles live in a `.css.ts` next to the component and read `vars` from
   `@trailpack-ui/theme`. Never write a hex value here — if a token is missing,

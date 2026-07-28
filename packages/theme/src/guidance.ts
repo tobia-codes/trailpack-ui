@@ -3,7 +3,7 @@
  *
  * This is the single source for both renderings of that guidance: the
  * Storybook reference under `stories/`, and the generated agent skill at
- * `.claude/skills/tokens/SKILL.md`. Written twice, it would be wrong once.
+ * `skills/theme/SKILL.md`. Written twice, it would be wrong once.
  *
  * Prose uses `backticks` for code; each renderer turns them into whatever it
  * needs. Avoid `|`, which would break the generated markdown tables.

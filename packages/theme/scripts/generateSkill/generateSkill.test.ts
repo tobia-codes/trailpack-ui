@@ -1,17 +1,18 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import {
-  catalogMetadataPath,
-  catalogSkillPath,
+  metadataPath,
+  pointerPath,
   renderMetadata,
+  renderPointer,
   renderSkill,
   skillPath,
 } from './generateSkill.ts';
 
 test.for([
   ['the committed skill', skillPath, renderSkill],
-  ['the catalogue copy of the skill', catalogSkillPath, renderSkill],
-  ['the catalogue metadata', catalogMetadataPath, renderMetadata],
+  ['its metadata', metadataPath, renderMetadata],
+  ['the pointer Claude Code loads', pointerPath, renderPointer],
 ] as const)('%s matches src/guidance.ts', ([, path, render]) => {
   const committed = readFileSync(path, 'utf8');
 

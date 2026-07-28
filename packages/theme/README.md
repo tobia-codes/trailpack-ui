@@ -151,7 +151,7 @@ pnpm build            # dist/ — index.js, theme.css and declarations
 pnpm build:storybook  # storybook-static/
 pnpm generate         # both generators below
 pnpm generate:tokens  # rewrite generated/TOKENS.md from src/guidance.ts
-pnpm generate:skill   # rewrite both copies of the tokens skill from src/guidance.ts
+pnpm generate:skill   # rewrite the theme skill from src/guidance.ts
 pnpm lint
 pnpm test             # contrast assertions, generated-doc freshness
 pnpm format
@@ -173,24 +173,27 @@ it sits among the others. They render through the same functions in
 `scripts/lib/renderGuidance.ts`, so they cannot differ in shape either.
 `pnpm generate` writes both.
 
-The skill lands in two places, byte-identical: `.claude/skills/tokens/SKILL.md`,
-where Claude Code finds it for work in this repository, and
-[`skills/tokens/`](../../skills/README.md) at the repository root, the
-tool-neutral catalogue a consumer of the published package copies from. The
-second gets a `metadata.json` alongside it, whose `packageVersion` range is
-derived from this package's `version` — so a copy that has fallen behind can be
-recognised, and nothing about it is hand-maintained.
+The skill is written once, to [`skills/theme/`](../../skills/README.md) at the
+repository root — the tool-neutral catalogue a consumer of the published package
+copies from. Alongside it goes a `metadata.json` whose `packageVersion` range is
+derived from this package's `version`, so a copy that has fallen behind can be
+recognised and nothing about it is hand-maintained.
+
+`.claude/skills/theme/SKILL.md`, also at the root, is how Claude Code finds the
+skill for work in this repository. It points at the catalogue rather than
+repeating it, and sits at the root because a skill under a package would only
+apply to files beneath it — this one is needed in `packages/react` too.
 
 Prose in the guidance marks code with backticks, because every renderer needs it
 — Storybook turns them into `<code>`, markdown leaves them alone. Avoid `|`,
 which would split a generated table row.
 
 Each generator has a test beside it that fails if any committed output no longer
-matches the guidance, so they cannot drift apart silently. The outputs inside
-this package are excluded from `oxfmt` via `ignorePatterns` in
-`oxfmt.config.mts` — formatting a generated file would make it differ from what
-the generator produces and fail that test on the next run. The root catalogue
-needs no such entry: it sits outside this package, and no formatter runs there.
+matches the guidance, so they cannot drift apart silently. `generated/` is
+excluded from `oxfmt` via `ignorePatterns` in `oxfmt.config.mts` — formatting a
+generated file would make it differ from what the generator produces and fail
+that test on the next run. The skill needs no such entry: every one of its
+outputs lands outside this package, where no formatter runs.
 
 `guidance.ts` is not part of the runtime API, and neither is `src/stories`.
 Living under `src` does not put them in the package: `tsconfig.build.json` builds

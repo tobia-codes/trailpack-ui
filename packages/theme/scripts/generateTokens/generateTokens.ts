@@ -19,9 +19,8 @@ the [README](../README.md).
 
 Three things render this guidance, and none of them owns it: this file, the
 Storybook reference (\`pnpm dev\`, which shows every token at its real value in
-both themes), and the agent skill — served both from
-\`.claude/skills/tokens/SKILL.md\` for work in this repository and from
-[\`skills/tokens/\`](../../../skills/README.md) at the repository root.`;
+both themes), and the agent skill at
+[\`skills/theme/\`](../../../skills/README.md).`;
 
 export const renderTokens = () => {
   const generated =

@@ -1,7 +1,9 @@
 export default {
-  // Both are generated from `src/guidance.ts`; formatting them would make them
-  // differ from what the generators produce and fail the freshness tests.
-  ignorePatterns: ['.claude/**', 'generated/**'],
+  // Generated from `src/guidance.ts`; formatting it would make it differ from
+  // what the generator produces and fail the freshness test. The skill's own
+  // outputs need no entry — they land outside this package, where no formatter
+  // runs.
+  ignorePatterns: ['generated/**'],
   printWidth: 100,
   tabWidth: 2,
   semi: true,

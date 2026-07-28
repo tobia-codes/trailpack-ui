@@ -1,10 +1,10 @@
 ---
-name: tokens
+name: theme
 description: >-
-  Use when writing or reviewing UI code in a project that depends on
-  @trailpack-ui/theme — picking colours, spacing, radii, type, shadows, icon
-  sizes, focus rings or stacking order. Says which token to reach for and why,
-  so components stay correct in both the light and the dark theme.
+  Use when writing or reviewing UI code against @trailpack-ui/theme — picking
+  colours, spacing, radii, type, shadows, icon sizes, focus rings or stacking
+  order. Says which token to reach for and why, so components stay correct in
+  both the light and the dark theme.
 ---
 
 <!-- Generated from packages/theme/src/guidance.ts by `pnpm generate:skill`. Do not edit. -->

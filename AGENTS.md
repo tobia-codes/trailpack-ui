@@ -36,30 +36,35 @@ what you are doing, whatever tool you are**:
 
 | Skill | Read it when |
 | --- | --- |
-| [`tokens`](packages/theme/.claude/skills/tokens/SKILL.md) | Writing or reviewing UI code — which colour, spacing, radius, type or shadow token to reach for. Applies in `packages/react` as much as in `packages/theme`, despite where it sits. |
+| [`theme`](skills/theme/SKILL.md) | Writing or reviewing UI code anywhere in the repository — which colour, spacing, radius, type or shadow token to reach for. |
 | [`add-component`](packages/react/.claude/skills/add-component/SKILL.md) | Adding a component to `@trailpack-ui/react` — the order of steps that avoids rework. |
 
 They carry procedure and reference, never rules: anything you must not get wrong
 is in an `AGENTS.md`, which is always loaded. A skill that starts restating one
 has drifted.
 
-### Two locations, and which one a skill belongs in
+### Where a skill lives, and why the two places differ
 
-`<package>/.claude/skills/<name>/` is where Claude Code discovers skills for
-work **in this repository**, and it is the default. Both skills above are there.
+A skill that only makes sense **with this repository checked out** sits under
+`<package>/.claude/skills/<name>/`, scoped to the package it applies to.
+`add-component` is one: it is about editing `packages/react`, and would mean
+nothing in someone else's project.
 
-[`skills/`](skills/README.md) at the root is a second, tool-neutral catalogue,
-for guidance that is useful **without this repository checked out** — a consumer
-of the published packages, whatever assistant they run. Only `tokens` qualifies;
-`add-component` is about editing `packages/react` and would mean nothing in
-someone else's project.
+A skill that is useful to a **consumer of the published packages** goes in
+[`skills/`](skills/README.md) at the root — a tool-neutral catalogue, plain
+markdown, no assistant in particular. `theme` is one: which token to reach for
+is the same question in a consumer's app as it is here.
 
-`tokens` therefore exists in both places, byte-identical, because neither
-location can serve the other's audience. That duplication is generated, not
-maintained: `pnpm generate:skill` in `packages/theme` writes both from
-`src/guidance.ts`, and a test fails if either goes stale. **Never edit a
-generated `SKILL.md` or `metadata.json` by hand** — see
+`theme` is needed by both audiences, so `.claude/skills/theme/SKILL.md` at the
+root **points at the catalogue instead of repeating it**. Both files are written
+by `pnpm generate:skill` in `packages/theme` from `src/guidance.ts`, and a test
+fails if either goes stale. **Never edit a generated `SKILL.md` or
+`metadata.json` by hand** — see
 [packages/theme/AGENTS.md](packages/theme/AGENTS.md).
+
+The pointer is at the root rather than under `packages/theme` on purpose: a
+skill under a package only applies to files beneath it, and this one is needed
+in `packages/react` just as much.
 
 A skill scoped to one package starts under that package. Promote it to the root
 catalogue only when a consumer would need it, and add it to both tables when you

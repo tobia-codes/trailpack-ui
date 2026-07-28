@@ -13,7 +13,7 @@ rather than inside a vendor's dot-directory.
 
 | Skill | Read it when |
 | --- | --- |
-| [`tokens`](tokens/) | Writing or reviewing UI code against `@trailpack-ui/theme` — which colour, spacing, radius, type, shadow, icon size, focus ring or z-index token to reach for, and which pairings are contrast-checked. |
+| [`theme`](theme/) | Writing or reviewing UI code against `@trailpack-ui/theme` — which colour, spacing, radius, type, shadow, icon size, focus ring or z-index token to reach for, and which pairings are contrast-checked. |
 
 ## Using one
 
@@ -21,7 +21,7 @@ Point your assistant at the `SKILL.md`, or copy the directory into wherever it
 looks for skills. For Claude Code that is your own project:
 
 ```sh
-cp -r skills/tokens ~/my-app/.claude/skills/
+cp -r skills/theme ~/my-app/.claude/skills/
 ```
 
 A copy is a snapshot. `metadata.json` records the range of package versions the
@@ -44,10 +44,15 @@ rules for editing the skill itself. See the root
 ## What is not here
 
 Skills about working **on** this repository — adding a component, wiring a
-package — stay under `<package>/.claude/skills/`, where Claude Code discovers
-them automatically. They are addressed to a contributor with the monorepo
-checked out, and mean nothing in a consumer's project. The root
+package — stay under `<package>/.claude/skills/`, scoped to the package they
+apply to. They are addressed to a contributor with the monorepo checked out, and
+mean nothing in a consumer's project. The root
 [AGENTS.md](../AGENTS.md#skills) lists both sets.
+
+A skill can be needed by both audiences, and `theme` is: agents working in this
+repository reach it through `.claude/skills/theme/` at the root, which is a
+pointer to this directory rather than a copy of it. The guidance is written
+once, here.
 
 ## Adding one
 
@@ -56,6 +61,6 @@ out. Give it a kebab-case directory and the three files above, then add it to
 the catalogue table — nothing generates that.
 
 If the guidance already exists as data in a package, render it rather than
-retyping it: `tokens` is generated from `packages/theme/src/guidance.ts` by
+retyping it: `theme` is generated from `packages/theme/src/guidance.ts` by
 `pnpm generate:skill`, with a test that fails if the committed copy goes stale.
 **Never edit a generated `SKILL.md` or `metadata.json` by hand.**
