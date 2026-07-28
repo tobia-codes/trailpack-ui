@@ -16,5 +16,5 @@
     // literally and so needs the `.ts` extension written out.
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "stories", "scripts", ".storybook", "vite.config.ts"]
+  "include": ["src", "scripts", ".storybook/**/*", "vite.config.ts"]
 }

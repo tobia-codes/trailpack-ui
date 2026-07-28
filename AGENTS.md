@@ -69,6 +69,22 @@ released as a `minor`, because pre-1.0 a `major` means committing to 1.0.0.
   package's `package.json`.** Each one causes a failure only much later, at
   publish time.
 
+## Functions
+
+**Write arrow functions.** `const render = (x: string) => …` is the default
+form everywhere — module scope, callbacks, components, test helpers.
+
+Reach for the `function` keyword only where it buys something the arrow cannot:
+
+- **Hoisting**, when a function is genuinely used above its definition and
+  reordering the file would make it read worse.
+- **`this`**, when a caller binds it — a plugin hook, a `mocha`-style callback.
+- **Generators**, which have no arrow form.
+- **Overload signatures**, which have to be declarations.
+
+"It has always been written that way" is not one of those. If a `function` in a
+diff has no such reason, it is an arrow.
+
 ## Comments
 
 **Write a comment only when the code cannot carry the point itself.** Comments
@@ -101,7 +117,8 @@ symbol is part of the package's surface, and those stay.
 
 ## The theme package
 
-`packages/theme` is the token contract. Three things about it are easy to break:
+`packages/theme` is the token contract. Several things about it are easy to
+break:
 
 - **Token values are asserted, not decorative.** `src/themes.test.ts` checks
   every colour pairing the token set promises against WCAG AA, in both themes.
@@ -112,14 +129,18 @@ symbol is part of the package's surface, and those stay.
   nothing in the build output may be content-hashed.
 - **What gets published is whatever `src/index.ts` reaches.**
   `tsconfig.build.json` narrows `include` to that one entry, so the module graph
-  decides the declaration output — stories, scripts and `guidance.ts` are never
-  in the program and need no exclusion. Adding a new export path to
-  `package.json` is therefore the one case that also needs a new entry in
-  `files` there. The package is framework-agnostic in what it ships: React and
-  Storybook are `devDependencies`, and `files` is `["dist"]`. Keep it that way.
+  decides the declaration output — `src/stories`, `scripts` and `guidance.ts`
+  are never in the program and need no exclusion, whether they sit under `src`
+  or not. Adding a new export path to `package.json` is therefore the one case
+  that also needs a new entry in `files` there. The package is
+  framework-agnostic in what it ships: React and Storybook are
+  `devDependencies`, and `files` is `["dist"]`. Keep it that way.
 - **Token usage guidance is written once, in `src/guidance.ts`.** The Storybook
-  tables and the generated agent skill at `.claude/skills/tokens/SKILL.md` are
-  both renderings of it. Never edit the skill by hand — run `pnpm
-  generate:skill`; a test fails if the committed file is stale. Adding or
-  changing a token means updating the guidance in the same change, or the
-  reference silently describes a set that no longer exists.
+  tables, `generated/TOKENS.md` and the agent skill at
+  `.claude/skills/tokens/SKILL.md` are all renderings of it, the last two
+  through the shared functions in `scripts/lib/render-guidance.ts`. Never edit a
+  generated file by hand.
+- **`pnpm generate` runs both generators**, and each has a test that fails if its
+  committed output is stale. So a new token means the token, the guidance and
+  one command — in the same change, or the reference silently describes a
+  set that no longer exists.

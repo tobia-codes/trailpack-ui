@@ -6,7 +6,7 @@ import { defineConfig, type Plugin } from 'vite';
  * `import '@trailpack-ui/theme/theme.css'` would fail with TS2882. A stub next to
  * it is what the `types` condition of that export points at.
  */
-function stylesheetTypeStub(): Plugin {
+const stylesheetTypeStub = (): Plugin => {
   return {
     name: 'trailpack-stylesheet-type-stub',
     generateBundle() {
@@ -20,7 +20,7 @@ export {};
       });
     },
   };
-}
+};
 
 export default defineConfig({
   plugins: [vanillaExtractPlugin(), stylesheetTypeStub()],

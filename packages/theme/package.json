@@ -34,12 +34,14 @@
     "build": "vite build && tsc -p tsconfig.build.json",
     "prepack": "pnpm build",
     "dev": "storybook dev -p 6006",
-    "generate:skill": "node scripts/generate-skill.ts",
+    "generate": "pnpm generate:tokens && pnpm generate:skill",
+    "generate:tokens": "node scripts/generate-tokens/index.ts",
+    "generate:skill": "node scripts/generate-skill/index.ts",
     "build:storybook": "storybook build",
     "lint": "oxlint",
     "test": "vitest run",
-    "format": "oxfmt . '!.claude/**'",
-    "format:check": "oxfmt --check . '!.claude/**'"
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
   },
   "devDependencies": {
     "@storybook/react-vite": "^10.5.5",

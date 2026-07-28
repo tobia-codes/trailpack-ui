@@ -18,13 +18,13 @@ import * as storyModule from './tokens.stories';
  */
 type StoryBody = { render: () => ReactNode };
 
-function isStory(value: unknown): value is StoryBody {
+const isStory = (value: unknown): value is StoryBody => {
   return (
     typeof value === 'object' &&
     value !== null &&
     typeof (value as Partial<StoryBody>).render === 'function'
   );
-}
+};
 
 const stories = Object.entries(storyModule as Record<string, unknown>).filter(
   (entry): entry is [string, StoryBody] => isStory(entry[1]),

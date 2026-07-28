@@ -1,15 +1,16 @@
 /**
  * Renders `src/guidance.ts` into the agent skill at
- * `.claude/skills/tokens/SKILL.md`.
+ * `.claude/skills/tokens/SKILL.md`. Written by `index.ts`, run with
+ * `pnpm generate:skill`.
  *
- * Run with `pnpm generate:skill`. `generate-skill.test.ts` fails if the
- * committed file no longer matches, so the guidance and the skill cannot drift.
+ * The test beside this file fails if the committed skill no longer matches, so
+ * the guidance and the skill cannot drift.
  */
-import { writeFileSync } from 'node:fs';
-import type { GuidanceChapter, GuidanceSection } from '../src/guidance.ts';
-import { guidance } from '../src/guidance.ts';
+import type { GuidanceChapter } from '../../src/guidance.ts';
+import { guidance } from '../../src/guidance.ts';
+import { renderChapters } from '../lib/render-guidance.ts';
 
-export const skillPath = new URL('../.claude/skills/tokens/SKILL.md', import.meta.url);
+export const skillPath = new URL('../../.claude/skills/tokens/SKILL.md', import.meta.url);
 
 const frontmatter = `---
 name: tokens
@@ -58,55 +59,16 @@ Dark mode is a class: put \`darkTheme\` (exported from the same package) on
    \`vars\`, it cannot use these tokens — that is a signal to move the styling,
    not to copy a hash.`;
 
-/** Cell text is untrusted for table syntax; a bare pipe would split the row. */
-function cell(text: string) {
-  return text.replaceAll('|', '\\|');
-}
-
-function renderSection(section: GuidanceSection) {
-  const parts = [`### ${section.title}`, ...section.lead];
-
-  if (section.rows) {
-    parts.push(
-      [
-        '| Token | Use it for |',
-        '| --- | --- |',
-        ...section.rows.map((row) => `| \`${cell(row.token)}\` | ${cell(row.when)} |`),
-      ].join('\n'),
-    );
-  }
-
-  for (const note of section.notes ?? []) {
-    parts.push(`> ${note}`);
-  }
-
-  return parts.join('\n\n');
-}
-
-function renderChapter(chapter: GuidanceChapter) {
-  return [
-    `## ${chapter.title}`,
-    ...Object.values(chapter.sections).map((section) => renderSection(section)),
-  ].join('\n\n');
-}
-
-export function renderSkill() {
+export const renderSkill = () => {
   // `overview` is the Storybook landing page. Here the preamble above already
   // covers it, and an agent that re-reads the same rules twice has just spent
   // context to learn nothing.
   const { overview: _landingPage, ...chapters } = guidance;
 
-  const body = Object.values(chapters as Record<string, GuidanceChapter>)
-    .map((chapter) => renderChapter(chapter))
-    .join('\n\n');
+  const body = renderChapters(chapters as Record<string, GuidanceChapter>);
 
   const generated =
     '<!-- Generated from packages/theme/src/guidance.ts by `pnpm generate:skill`. Do not edit. -->';
 
   return `${[frontmatter, generated, preamble, body].join('\n\n')}\n`;
-}
-
-if (import.meta.filename === process.argv[1]) {
-  writeFileSync(skillPath, renderSkill());
-  console.log(`Wrote ${skillPath.pathname}`);
-}
+};

@@ -100,72 +100,22 @@ into names you own, and use those:
 document.documentElement.style.setProperty('--app-surface', vars.color.surface);
 ```
 
-The set is meant to be complete enough to style a whole application with,
-without reaching for a hex value.
+### The token set
 
-Run `pnpm dev` for the full reference — every token rendered in both themes,
-with the rule for when to reach for each one. See [Storybook](#storybook).
+Nine scales — `color`, `tone`, `space`, `radius`, `iconSize`, `focusRing`,
+`font`, `shadow`, `zIndex` — meant to be complete enough to style a whole
+application with, without reaching for a hex value.
 
-| Scale       | Keys                                                                                                           |
-| ----------- | -------------------------------------------------------------------------------------------------------------- |
-| `color`     | `background`, `foreground`, `surface`, `muted`, `mutedForeground`, `border`, `borderStrong`, `ring`, `overlay` |
-| `tone`      | `accent`, `neutral`, `danger`, `success`, `warning`, `info` — see below                                        |
-| `space`     | `0`–`24`, numeric: the key × 4px, in `rem`                                                                     |
-| `radius`    | `xs`, `sm`, `md`, `lg`, `xl`, `full`                                                                           |
-| `iconSize`  | `sm`, `md`, `lg`, `xl`                                                                                         |
-| `focusRing` | `width`, `offset` (the colour is `color.ring`)                                                                 |
-| `font`      | `family`, `size`, `weight`, `lineHeight`, `letterSpacing`                                                      |
-| `shadow`    | `xs`, `sm`, `md`, `lg`, `xl`                                                                                   |
-| `zIndex`    | `base`, `dropdown`, `sticky`, `overlay`, `modal`, `popover`, `toast`                                           |
-
-### Choosing a token
-
-Pick by **role**, not by appearance. The question is never "which grey looks
-right here" but "what is this element" — a recessed fill, a secondary label, a
-divider. Pick the token that names that, and both themes come out correct
-without the component knowing which one is active.
-
-That gives an order to work in:
-
-1. **Does the thing carry a meaning?** A primary action, an error, a success
-   state — then it is a `tone`, and nothing else will do.
-2. **Is it neutral chrome?** The page, a card, a divider, body or secondary
-   text — then it is a `color`.
-3. **Everything else** is geometry and type: `space`, `radius`, `font`,
-   `iconSize`, `shadow`, `zIndex`.
-
-The distinctions worth knowing up front:
-
-| Instead of picking by look  | Pick by role                                                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| "a light grey box"          | `color.surface` if it is **raised** off the page, `color.muted` if it is **recessed** into it — they are not brightness steps |
-| "a dimmer text colour"      | `color.mutedForeground`, for labels and help text. Not for body copy; it is quieter on purpose                                |
-| "the brand purple, as text" | `tone.accent.text`. `solid` is a background step and is not contrast-tested as text                                           |
-| "a bit more space"          | a step on the `space` scale, chosen by how closely the two things belong together                                             |
-| "make it float"             | `shadow`, matched to the layer — and always together with `color.surface`, since shadows barely read in the dark theme        |
-
-`shadow` is the only geometric scale that is themed. `zIndex` should never be
-written as a literal: the value only means something relative to the other
-layers, so a raw number is a guess about code you cannot see.
+**[TOKENS.md](generated/TOKENS.md)** is the reference: every token, with the rule
+for when to reach for it. `pnpm dev` shows the same thing with the values
+rendered in both themes — see [Storybook](#storybook).
 
 ### Tones
 
 A tone is one meaning — brand, danger, success — in all the forms a component
-needs it. Every tone has the same nine steps, so anything that varies across
-tones can be written once:
-
-| Step                                 | For                                           |
-| ------------------------------------ | --------------------------------------------- |
-| `solid`, `solidHover`, `solidActive` | filled button or badge background             |
-| `onSolid`                            | text and icons on those                       |
-| `subtle`, `subtleHover`              | soft alert or badge fill                      |
-| `onSubtle`                           | text on those                                 |
-| `text`                               | the tone as text on a page surface            |
-| `border`                             | outline of a subtle fill, or a tinted divider |
-
-`text` is separate from `solid` on purpose: `tone.warning.solid` is an amber
-that sits at roughly 2:1 on white, so an inline validation message needs its own
-value. Every pairing in that table is asserted against WCAG AA in
+needs it: a filled step and the text that sits on it, a soft step and the text
+on that, a text step for use on a page surface, a border. Every tone carries the
+same nine, and every pairing the set promises is asserted against WCAG AA in
 `src/themes.test.ts`, in both themes.
 
 Because the steps are nested under the tone rather than flattened into
@@ -175,7 +125,7 @@ index into it. `ToneName` is exported for that:
 ```tsx
 import { type ToneName, vars } from '@trailpack-ui/theme';
 
-export function Callout({ tone = 'info' }: { tone?: ToneName }) {
+export const Callout = ({ tone = 'info' }: { tone?: ToneName }) => {
   return (
     <div
       style={{
@@ -185,7 +135,7 @@ export function Callout({ tone = 'info' }: { tone?: ToneName }) {
       }}
     />
   );
-}
+};
 ```
 
 The paths on `vars` are the public API; the variable names behind them are not,
@@ -199,39 +149,50 @@ helper for producing one.
 pnpm dev              # Storybook on :6006 — the token reference
 pnpm build            # dist/ — index.js, theme.css and declarations
 pnpm build:storybook  # storybook-static/
+pnpm generate         # both generators below
+pnpm generate:tokens  # rewrite generated/TOKENS.md from src/guidance.ts
 pnpm generate:skill   # rewrite .claude/skills/tokens/SKILL.md from src/guidance.ts
 pnpm lint
-pnpm test             # contrast assertions, story rendering, skill freshness
+pnpm test             # contrast assertions, story rendering, generated-doc freshness
 pnpm format
 ```
 
-### Guidance has one source
+### Generated documentation
 
 The rules for _when_ to reach for a token live in `src/guidance.ts`, as data.
-Two things render them, and neither owns them:
+Three things render them, and none of them owns them:
 
-- the Storybook stories, as the "use it for" tables;
-- `.claude/skills/tokens/SKILL.md`, generated by `pnpm generate:skill`, which
-  is what an agent reads when writing UI code against this package.
+- `generated/TOKENS.md`, the reference a person reads;
+- `.claude/skills/tokens/SKILL.md`, which is what an agent reads when writing UI
+  code against this package;
+- the Storybook stories, as the "use it for" tables.
 
-Prose in that file marks code with backticks, because both renderers need it —
-Storybook turns them into `<code>`, markdown leaves them alone. Avoid `|`, which
-would split a generated table row.
+The first two are the same guidance in a different frame — the skill opens with
+rules addressed to whoever is writing the code, `generated/TOKENS.md` with where
+it sits among the others. They render through the same functions in
+`scripts/lib/render-guidance.ts`, so they cannot differ in shape either.
+`pnpm generate` writes both.
 
-`scripts/generate-skill.test.ts` fails if the committed skill no longer matches
-the guidance, so the two cannot drift apart silently. The generated file is
-excluded from `oxfmt`; formatting it would make it differ from what the
-generator produces and fail that test on the next run.
+Prose in the guidance marks code with backticks, because every renderer needs it
+— Storybook turns them into `<code>`, markdown leaves them alone. Avoid `|`,
+which would split a generated table row.
 
-`guidance.ts` is not part of the runtime API. It does not reach `dist` for the
-same reason the stories do not: `tsconfig.build.json` builds from `src/index.ts`
-alone, so anything the entry point does not import is not in the program.
+Each generator has a test beside it that fails if its committed output no longer
+matches the guidance, so the two cannot drift apart silently. Both outputs are
+excluded from `oxfmt` via `ignorePatterns` in `oxfmt.config.mts` — formatting a
+generated file would make it differ from what the generator produces and fail
+that test on the next run.
+
+`guidance.ts` is not part of the runtime API, and neither is `src/stories`.
+Living under `src` does not put them in the package: `tsconfig.build.json` builds
+from `src/index.ts` alone, so anything the entry point does not import is not in
+the program, and `files` ships only `dist`.
 
 ### Storybook
 
-`pnpm dev` serves the token reference under **Foundations → Tokens**. It is
-the documentation for the questions this README only summarises: every token
-rendered at its real value, next to the rule for when to reach for it.
+`pnpm dev` serves the token reference under **Foundations → Tokens**: the same
+guidance as [TOKENS.md](generated/TOKENS.md), but with every token rendered at
+its real value next to the rule for it.
 
 The toolbar switches between light and dark, and the values printed under each
 swatch follow — the class swap is exactly the one a consuming app does, so what
@@ -243,7 +204,7 @@ Two things about how the stories are built are deliberate:
   keeps the reference honest about the package's central claim — that the
   tokens work with no vanilla-extract and no bundler plugin in the consumer.
 - **`storybook build` does not verify that a story renders**, only that it
-  bundles. `stories/smoke.test.tsx` renders each one to a string under
+  bundles. `src/stories/smoke.test.tsx` renders each one to a string under
   `pnpm test`, so a story that throws fails CI instead of failing silently in a
   browser nobody opened.
 

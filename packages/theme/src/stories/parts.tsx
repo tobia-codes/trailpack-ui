@@ -6,34 +6,34 @@
  * no vanilla-extract in the consumer.
  */
 import { createContext, type CSSProperties, type ReactNode, use } from 'react';
-import { vars } from '../src/themes.css';
-import type { GuidanceSection } from '../src/guidance';
-import { darkTokens, lightTokens } from '../src/tokens';
+import { vars } from '../themes.css';
+import type { GuidanceSection } from '../guidance';
+import { darkTokens, lightTokens } from '../tokens';
 
 const ThemeContext = createContext<'light' | 'dark'>('light');
 
-export function ThemeProvider({
+export const ThemeProvider = ({
   theme,
   children,
 }: {
   theme: 'light' | 'dark';
   children: ReactNode;
-}) {
+}) => {
   return <ThemeContext value={theme}>{children}</ThemeContext>;
-}
+};
 
 /**
  * The raw token values for whichever theme the toolbar has selected. `vars`
  * gives the `var(--…)` reference that renders the swatch; this gives the value
  * printed underneath it.
  */
-export function useTokens() {
+export const useTokens = () => {
   return use(ThemeContext) === 'dark' ? darkTokens : lightTokens;
-}
+};
 
 const stack = (gap: string): CSSProperties => ({ display: 'flex', flexDirection: 'column', gap });
 
-function Code({ children }: { children: ReactNode }) {
+const Code = ({ children }: { children: ReactNode }) => {
   return (
     <code
       style={{
@@ -48,17 +48,17 @@ function Code({ children }: { children: ReactNode }) {
       {children}
     </code>
   );
-}
+};
 
 // Guidance prose marks code with backticks so the same string can also be
 // emitted as markdown. Odd-indexed splits are the code spans.
-function Inline({ text }: { text: string }) {
+const Inline = ({ text }: { text: string }) => {
   return (
     <>{text.split('`').map((part, i) => (i % 2 === 1 ? <Code key={i}>{part}</Code> : part))}</>
   );
-}
+};
 
-export function Page({ title, children }: { title: string; children: ReactNode }) {
+export const Page = ({ title, children }: { title: string; children: ReactNode }) => {
   return (
     <article style={{ maxWidth: '64rem', margin: '0 auto', ...stack(vars.space[16]) }}>
       <h1
@@ -75,14 +75,20 @@ export function Page({ title, children }: { title: string; children: ReactNode }
       {children}
     </article>
   );
-}
+};
 
 /**
  * One section of the reference, driven by `src/guidance.ts`. The layout order
  * is fixed — lead, rules, specimens, caveats — so that the same data renders
  * as markdown for the agent skill without a per-section layout hint.
  */
-export function Section({ section, children }: { section: GuidanceSection; children?: ReactNode }) {
+export const Section = ({
+  section,
+  children,
+}: {
+  section: GuidanceSection;
+  children?: ReactNode;
+}) => {
   return (
     <section style={stack(vars.space[6])}>
       <div style={stack(vars.space[3])}>
@@ -126,9 +132,9 @@ export function Section({ section, children }: { section: GuidanceSection; child
       ))}
     </section>
   );
-}
+};
 
-function WhenToUse({ rows }: { rows: readonly { token: string; when: string }[] }) {
+const WhenToUse = ({ rows }: { rows: readonly { token: string; when: string }[] }) => {
   return (
     <table
       style={{
@@ -178,9 +184,9 @@ function WhenToUse({ rows }: { rows: readonly { token: string; when: string }[] 
       </tbody>
     </table>
   );
-}
+};
 
-export function Grid({ min = '11rem', children }: { min?: string; children: ReactNode }) {
+export const Grid = ({ min = '11rem', children }: { min?: string; children: ReactNode }) => {
   return (
     <div
       style={{
@@ -192,9 +198,9 @@ export function Grid({ min = '11rem', children }: { min?: string; children: Reac
       {children}
     </div>
   );
-}
+};
 
-export function Label({ name, value }: { name: string; value?: string }) {
+export const Label = ({ name, value }: { name: string; value?: string }) => {
   return (
     <div style={stack(vars.space[1])}>
       <span style={{ fontFamily: vars.font.family.mono, fontSize: vars.font.size.xs }}>{name}</span>
@@ -211,9 +217,9 @@ export function Label({ name, value }: { name: string; value?: string }) {
       )}
     </div>
   );
-}
+};
 
-export function Swatch({ name, value, fill }: { name: string; value: string; fill: string }) {
+export const Swatch = ({ name, value, fill }: { name: string; value: string; fill: string }) => {
   return (
     <div style={stack(vars.space[2])}>
       <div
@@ -229,4 +235,4 @@ export function Swatch({ name, value, fill }: { name: string; value: string; fil
       <Label name={name} value={value} />
     </div>
   );
-}
+};

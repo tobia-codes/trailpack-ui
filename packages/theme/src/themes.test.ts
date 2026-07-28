@@ -6,18 +6,18 @@ import { darkTokens, lightTokens, type ThemeTokens, type ToneName } from './toke
  * shipped in `src`: the token values are literals, so nothing in the package
  * needs to do colour maths at runtime — only this test does, to check them.
  */
-function luminance(hex: string): number {
+const luminance = (hex: string): number => {
   const channel = (offset: number) => {
     const c = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
     return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   };
   return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
-}
+};
 
-function contrast(a: string, b: string): number {
+const contrast = (a: string, b: string): number => {
   const [la, lb] = [luminance(a), luminance(b)];
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
-}
+};
 
 const TONES: ToneName[] = ['accent', 'neutral', 'danger', 'success', 'warning', 'info'];
 
@@ -35,7 +35,7 @@ const VISIBLE = 1.2;
 type Pair = { label: string; fg: string; bg: string; min: number };
 
 /** Every pairing the token set promises, with the ratio it has to clear. */
-function pairs(tokens: ThemeTokens): Pair[] {
+const pairs = (tokens: ThemeTokens): Pair[] => {
   const { color, tone } = tokens;
 
   // Tone text has to survive the surface closest to it in luminance — `muted`
@@ -83,7 +83,7 @@ function pairs(tokens: ThemeTokens): Pair[] {
   }
 
   return list;
-}
+};
 
 const themes = { light: lightTokens, dark: darkTokens };
 

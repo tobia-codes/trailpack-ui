@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { guidance } from '../src/guidance';
-import { vars } from '../src/themes.css';
-import type { ToneName } from '../src/tokens';
+import { guidance } from '../guidance';
+import { vars } from '../themes.css';
+import type { ToneName } from '../tokens';
 import { Grid, Label, Page, Section, Swatch, useTokens } from './parts';
 
 const meta: Meta = {
@@ -88,7 +88,7 @@ export const Color: Story = {
   },
 };
 
-function SurfaceDemo() {
+const SurfaceDemo = () => {
   return (
     <div
       style={{
@@ -129,7 +129,7 @@ function SurfaceDemo() {
       </div>
     </div>
   );
-}
+};
 
 export const Tones: Story = {
   render: function TonesStory() {
@@ -152,7 +152,7 @@ export const Tones: Story = {
   },
 };
 
-function ToneRow({ tone, values }: { tone: ToneName; values: Record<string, string> }) {
+const ToneRow = ({ tone, values }: { tone: ToneName; values: Record<string, string> }) => {
   const t = vars.tone[tone];
 
   return (
@@ -207,7 +207,7 @@ function ToneRow({ tone, values }: { tone: ToneName; values: Record<string, stri
       </div>
     </div>
   );
-}
+};
 
 export const Spacing: Story = {
   render: function SpacingStory() {
@@ -520,7 +520,7 @@ const focusRingCss = `
 }
 `;
 
-function FocusDemo({
+const FocusDemo = ({
   label,
   background,
   color,
@@ -528,7 +528,7 @@ function FocusDemo({
   label: string;
   background: string;
   color: string;
-}) {
+}) => {
   return (
     <button
       type="button"
@@ -548,4 +548,4 @@ function FocusDemo({
       {label} — focus me
     </button>
   );
-}
+};
