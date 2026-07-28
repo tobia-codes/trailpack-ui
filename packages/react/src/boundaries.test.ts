@@ -3,8 +3,14 @@ import { describe, expect, it } from 'vitest';
 
 const DIRECTIVE = "'use client'";
 
+// Stories and their custom docs sit beside the component but never reach
+// `src/index.ts`, so they ship nothing and need no directive either way.
 const sourceFiles = globSync('src/**/*.{ts,tsx}').filter(
-  (file) => !file.endsWith('.test.ts') && !file.endsWith('.css.ts') && !file.includes('/stories/'),
+  (file) =>
+    !file.endsWith('.test.ts') &&
+    !file.endsWith('.css.ts') &&
+    !file.endsWith('.stories.tsx') &&
+    !file.includes('/storybook/'),
 );
 
 const reactImport = /import\s*\{([^}]*)\}\s*from\s*'react'/;

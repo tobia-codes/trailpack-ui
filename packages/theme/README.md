@@ -190,11 +190,15 @@ the program, and `files` ships only `dist`.
 
 ### Storybook
 
-`pnpm dev` opens on **Overview**, which is this file: `src/stories/readme.mdx`
+`pnpm dev` opens on **Overview**, which is this file: `.storybook/readme.mdx`
 reads it with Vite's `?raw` and hands it to the `Markdown` block from
 `@storybook/addon-docs`, so the landing page cannot fall behind the README.
 Relative links are rewritten to the repository there, since they would otherwise
 resolve against Storybook's own URL.
+
+It lives with the Storybook configuration rather than under `src/stories`
+because it documents the package rather than any one story — the same split
+`packages/react` makes.
 
 The token reference itself is under **Foundations → Tokens**: the same guidance
 as [TOKENS.md](generated/TOKENS.md), but with every token rendered at its real

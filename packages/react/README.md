@@ -8,6 +8,11 @@ This is the package for everything React needs and nothing needs a heavy
 dependency for. Anything that would pull in a large one — a data grid, a date
 picker, a charting layer — gets its own package rather than a slot here.
 
+It is being built up one component at a time. `Button` is what exists so far;
+the structure around it — the token styling, the client-boundary rules, the
+build — is settled, so a new component is a new folder under `src/components`
+and nothing else.
+
 **It renders on the server and in the browser, in any React setup.** Next.js App
 Router is supported specifically, but not required, and nothing here is written
 against it — see [Server rendering and Next.js](#server-rendering-and-nextjs).
@@ -45,17 +50,15 @@ import '@trailpack-ui/react/styles.css';
 Then:
 
 ```tsx
-import { Button, Callout, Card, Stack } from '@trailpack-ui/react';
+import { Button } from '@trailpack-ui/react';
 
-export const Panel = () => (
-  <Card>
-    <Stack gap={4}>
-      <Callout tone="info" title="Heads up">
-        Tokens carry the colours; components carry the shape.
-      </Callout>
-      <Button tone="accent">Continue</Button>
-    </Stack>
-  </Card>
+export const Actions = () => (
+  <>
+    <Button tone="accent">Continue</Button>
+    <Button tone="neutral" variant="ghost">
+      Cancel
+    </Button>
+  </>
 );
 ```
 
@@ -72,21 +75,22 @@ it costs is the JavaScript, not the server pass.
 So this package puts the directive on the modules that genuinely need it, and
 nowhere else:
 
-| Module                                              | Directive | Why                                                                |
-| --------------------------------------------------- | --------- | ------------------------------------------------------------------ |
-| `Badge`, `Button`, `Callout`, `Card`, `Stack`, `cx` | no        | No state, no effects, no browser APIs                              |
-| `Disclosure`, `useDisclosure`, `useMediaQuery`      | **yes**   | Call React's runtime — `useState`, `useId`, `useSyncExternalStore` |
+| Module                           | Directive | Why                                                       |
+| -------------------------------- | --------- | --------------------------------------------------------- |
+| `Button`, `cx`                   | no        | No state, no effects, no browser APIs                     |
+| `useDisclosure`, `useMediaQuery` | **yes**   | Call React's runtime — `useState`, `useSyncExternalStore` |
 
 The consequence is worth being precise about, because it is the whole point:
 
-- In a **Server Component**, `<Card>` and `<Button>` render to HTML and ship
-  **zero JavaScript**. They are Server Components themselves.
+- In a **Server Component**, `<Button>` renders to HTML and ships **zero
+  JavaScript**. It is a Server Component itself.
 - Pass an `onClick` and the _caller_ becomes the client boundary — `Button`
   joins that graph on its own, without a directive of its own. That is why a
   purely presentational component is better off without one: it works on both
   sides, and only pays where it is used interactively.
-- `<Disclosure>` is a client boundary wherever it appears. A Server Component
-  may still render it; its HTML arrives in the first response.
+- A component that holds its own state is the other case: it carries the
+  directive and is a client boundary wherever it appears. A Server Component
+  may still render it, and its HTML arrives in the first response.
 
 **The barrel is deliberately not a boundary.** `src/index.ts` carries no
 directive, so importing from `@trailpack-ui/react` in a Server Component does
@@ -116,9 +120,11 @@ first paint.
 
 ## API
 
-**Components** — `Badge`, `Button`, `Callout`, `Card`, `Disclosure`, `Stack`.
-Each takes the props of the element it renders, so `className`, `ref`, `id`,
-`aria-*` and handlers pass straight through. `className` is appended, not
+**Components** — `Button`, in every tone the token set carries, with `solid`,
+`subtle` and `ghost` variants and three sizes.
+
+Components take the props of the element they render, so `className`, `ref`,
+`id`, `aria-*` and handlers pass straight through. `className` is appended, not
 replaced.
 
 **Hooks** — `useDisclosure` (open/closed state with stable callbacks),
@@ -155,7 +161,7 @@ its `dist`, exactly as a consuming app would. From the root, `pnpm build` and
 a requirement. Bundled into a single `index.js` there would be exactly one place
 to put a directive — and therefore only the choice between "the entire package
 is a client boundary" and "none of it is". Per-module output is what lets
-`Disclosure` carry one while `Card` does not.
+`useDisclosure` carry one while `Button` does not.
 
 Vite 8 (on Rolldown) preserves the directives as they are; no plugin is needed
 for it. `src/boundaries.test.ts` asserts both halves of that — that a module
@@ -180,6 +186,20 @@ wrapper everywhere — reversible, but not for free.
 `pnpm dev` opens on **Overview**, which is this file, rendered the same way the
 theme package does it. The components are under **Components**, with the light
 and dark toolbar switch driving the same class swap a consuming app performs.
+
+**A story lives beside the component it documents**, in that component's folder
+under `src/components` — there is no separate stories directory. A component
+that needs written documentation beyond its stories gets a `storybook/` folder
+next to them for the MDX; nothing else goes there. The overview page and the
+theme decorator are the exceptions and sit in `.storybook`, since they belong
+to the Storybook setup rather than to any one component.
+
+```
+src/components/Button/
+  Button.tsx
+  Button.css.ts
+  Button.stories.tsx
+```
 
 Nothing verifies that a story _renders_. `pnpm build:storybook` only bundles
 them, so a story that throws fails in the browser rather than in CI.
