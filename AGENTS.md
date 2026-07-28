@@ -69,9 +69,39 @@ released as a `minor`, because pre-1.0 a `major` means committing to 1.0.0.
   package's `package.json`.** Each one causes a failure only much later, at
   publish time.
 
+## Comments
+
+**Write a comment only when the code cannot carry the point itself.** Comments
+are not free: they take up reading space, they go stale silently, and a file
+padded with them takes longer to understand than the same file without.
+
+The bar is *why*, not *what*. A comment earns its place when it records
+something the reader cannot recover from the code — a constraint from outside
+the file, an alternative that was tried and rejected, a consequence that only
+shows up somewhere else. Everything else is noise:
+
+- Restating the code in prose (`// increment the counter`).
+- Captioning an obvious block (`// imports`, `// helper functions`).
+- Repeating a name that is already descriptive.
+- Documenting what a change *is*. That belongs in the commit message.
+
+Keep length in proportion. A paragraph above four lines of configuration is a
+sign the reasoning belongs in the README or a commit message, not inline — and
+if it must stay inline, it can almost always be two lines instead of ten.
+
+Do not narrate absence. Explaining why something is *not* in the file is worth
+it only when a reader is genuinely likely to add it back and break something;
+otherwise it is a comment about a file that does not exist.
+
+Same rule when editing: if a change makes an existing comment wrong, fix it or
+delete it. A stale comment is worse than none, because it is trusted.
+
+None of this restricts doc comments on exported API — a `/** */` on an exported
+symbol is part of the package's surface, and those stay.
+
 ## The theme package
 
-`packages/theme` is the token contract. Two things about it are easy to break:
+`packages/theme` is the token contract. Three things about it are easy to break:
 
 - **Token values are asserted, not decorative.** `src/themes.test.ts` checks
   every colour pairing the token set promises against WCAG AA, in both themes.
@@ -80,3 +110,8 @@ released as a `minor`, because pre-1.0 a `major` means committing to 1.0.0.
 - **`dist/theme.css` is an export path in `package.json`, so its filename is
   public API.** It is pinned via `build.lib.cssFileName` in `vite.config.ts`;
   nothing in the build output may be content-hashed.
+- **Stories live in `stories/`, not in `src/`.** `tsconfig.build.json` compiles
+  `src` wholesale and only excludes `*.test.ts`, so a story placed under `src`
+  would emit declarations into `dist` and drag React into the published types.
+  The package is framework-agnostic in what it ships — React and Storybook are
+  `devDependencies`, and `files` is `["dist"]`. Keep it that way.

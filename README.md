@@ -14,6 +14,9 @@ under the `@trailpack-ui` scope.
 Each package stands on its own: it carries its own build, lint, format and test
 setup and has no dependency on the others.
 
+`packages/theme` ships a Storybook documenting the tokens and when to use each
+one — `pnpm --filter @trailpack-ui/theme dev`.
+
 ## Layout
 
 ```
@@ -37,6 +40,7 @@ the workspace:
 
 ```sh
 pnpm install       # install everything
+pnpm dev           # turbo run dev — Storybook, for packages that have one
 pnpm build         # turbo run build
 pnpm lint          # turbo run lint
 pnpm test          # turbo run test

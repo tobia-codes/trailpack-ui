@@ -80,6 +80,9 @@ meant to be typed out in a hand-written stylesheet — go through `vars`.
 The set is meant to be complete enough to style a whole application with,
 without reaching for a hex value.
 
+Run `pnpm dev` for the full reference — every token rendered in both themes,
+with the rule for when to reach for each one. See [Storybook](#storybook).
+
 | Scale       | Keys                                                                                                           |
 | ----------- | -------------------------------------------------------------------------------------------------------------- |
 | `color`     | `background`, `foreground`, `surface`, `muted`, `mutedForeground`, `border`, `borderStrong`, `ring`, `overlay` |
@@ -91,6 +94,36 @@ without reaching for a hex value.
 | `font`      | `family`, `size`, `weight`, `lineHeight`, `letterSpacing`                                                      |
 | `shadow`    | `xs`, `sm`, `md`, `lg`, `xl`                                                                                   |
 | `zIndex`    | `base`, `dropdown`, `sticky`, `overlay`, `modal`, `popover`, `toast`                                           |
+
+### Choosing a token
+
+Pick by **role**, not by appearance. The question is never "which grey looks
+right here" but "what is this element" — a recessed fill, a secondary label, a
+divider. Pick the token that names that, and both themes come out correct
+without the component knowing which one is active.
+
+That gives an order to work in:
+
+1. **Does the thing carry a meaning?** A primary action, an error, a success
+   state — then it is a `tone`, and nothing else will do.
+2. **Is it neutral chrome?** The page, a card, a divider, body or secondary
+   text — then it is a `color`.
+3. **Everything else** is geometry and type: `space`, `radius`, `font`,
+   `iconSize`, `shadow`, `zIndex`.
+
+The distinctions worth knowing up front:
+
+| Instead of picking by look  | Pick by role                                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| "a light grey box"          | `color.surface` if it is **raised** off the page, `color.muted` if it is **recessed** into it — they are not brightness steps |
+| "a dimmer text colour"      | `color.mutedForeground`, for labels and help text. Not for body copy; it is quieter on purpose                                |
+| "the brand purple, as text" | `tone.accent.text`. `solid` is a background step and is not contrast-tested as text                                           |
+| "a bit more space"          | a step on the `space` scale, chosen by how closely the two things belong together                                             |
+| "make it float"             | `shadow`, matched to the layer — and always together with `color.surface`, since shadows barely read in the dark theme        |
+
+`shadow` is the only geometric scale that is themed. `zIndex` should never be
+written as a literal: the value only means something relative to the other
+layers, so a raw number is a guess about code you cannot see.
 
 ### Tones
 
@@ -140,11 +173,37 @@ helper for producing one.
 ## Development
 
 ```sh
-pnpm build        # dist/ — index.js, theme.css and declarations
+pnpm dev              # Storybook on :6006 — the token reference
+pnpm build            # dist/ — index.js, theme.css and declarations
+pnpm build:storybook  # storybook-static/
 pnpm lint
-pnpm test         # contrast assertions over both themes
+pnpm test             # contrast assertions, and every story rendered in both themes
 pnpm format
 ```
+
+### Storybook
+
+`pnpm dev` serves the token reference under **Foundations → Tokens**. It is
+the documentation for the questions this README only summarises: every token
+rendered at its real value, next to the rule for when to reach for it.
+
+The toolbar switches between light and dark, and the values printed under each
+swatch follow — the class swap is exactly the one a consuming app does, so what
+you see is what the tokens resolve to.
+
+Two things about how the stories are built are deliberate:
+
+- **They style themselves with inline `vars`**, not with `.css.ts` files. That
+  keeps the reference honest about the package's central claim — that the
+  tokens work with no vanilla-extract and no bundler plugin in the consumer.
+- **`storybook build` does not verify that a story renders**, only that it
+  bundles. `stories/smoke.test.tsx` renders each one to a string under
+  `pnpm test`, so a story that throws fails CI instead of failing silently in a
+  browser nobody opened.
+
+React and Storybook are `devDependencies` here, and `files` ships only `dist`.
+The published package stays framework-agnostic; nothing from the stories
+reaches a consumer.
 
 ### Why Vite library mode
 
