@@ -12,6 +12,10 @@ styled with `@trailpack-ui/theme` through vanilla-extract. The line that keeps
 it coherent is **no heavy dependencies** — anything needing one (a data grid, a
 date picker, a charting layer) belongs in its own package, not here.
 
+Adding a component is a procedure with an order that matters; the
+[`add-component` skill](.claude/skills/add-component/SKILL.md) has it. This file
+stays the source for the rules it applies.
+
 ## The `'use client'` boundary is the central invariant
 
 Read [README.md](README.md#server-rendering-and-nextjs) before touching it. The
@@ -47,6 +51,12 @@ The theme decorator and the package overview live in `.storybook`, with the
 configuration they belong to.
 
 ## Styling
+
+**Which token to reach for is answered by the
+[`tokens` skill](../theme/.claude/skills/tokens/SKILL.md).** It sits in the theme
+package, so a directory-scoped tool will not surface it while you are working
+here — open it anyway; this is the package where those decisions are actually
+made.
 
 - Styles live in a `.css.ts` next to the component and read `vars` from
   `@trailpack-ui/theme`. Never write a hex value here — if a token is missing,

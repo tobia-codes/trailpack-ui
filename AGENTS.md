@@ -1,34 +1,53 @@
 # AGENTS.md
 
-Guidance for AI agents working in this repository. Read this before making
-changes; it documents conventions and pitfalls that are not obvious from the
-code alone.
+Guidance for AI agents working in this repository. It carries the defaults you
+would otherwise get wrong without noticing — read it before making changes.
 
 ## What this is
 
 A pnpm workspace monorepo for the Trailpack UI toolchain, orchestrated with
-Turborepo. Packages are versioned with Changesets and published to npm under the
-`@trailpack-ui` scope. See [README.md](README.md) for the layout and the command
-list.
+Turborepo and published to npm under the `@trailpack-ui` scope. See
+[README.md](README.md) for the layout, the commands and the release model.
 
-Each package owns its build, lint, format and test setup. The one edge between
-them is that `react` takes `theme` as a peer dependency; there is no shared
-config package, and one is not the default — add it only when something is
-actually duplicated three times over.
-
-**Every package has its own AGENTS.md, and this file carries only what applies
+**Every package has its own AGENTS.md; this file carries only what applies
 repository-wide.** Read the package's before changing anything in it — both
 document a failure that is silent rather than loud:
 
-- [`packages/theme`](packages/theme/AGENTS.md) — the token contract. Guidance is
-  written once and rendered into three places, and a renamed token breaks
-  `packages/react` without an error anywhere.
+- [`packages/theme`](packages/theme/AGENTS.md) — a renamed token breaks
+  `packages/react` with no error anywhere.
 - [`packages/react`](packages/react/AGENTS.md) — whether a module carries
-  `'use client'` decides what lands in a consumer's client bundle, and it is
-  easy to get wrong in a way nothing complains about.
+  `'use client'` decides what lands in a consumer's client bundle.
 
 A new package gets the same pair: an `AGENTS.md` beside its `package.json`, and
-a `CLAUDE.md` that does nothing but `@AGENTS.md`.
+a `CLAUDE.md` containing nothing but `@AGENTS.md`. If it brings a skill, list it
+under [Skills](#skills) too — nothing generates that table.
+
+There is no shared config package, and one is not the default — add it only when
+something is actually duplicated three times over. The same holds for anything
+scoped to one package today. A **second** React package is the trigger to hoist
+what it shares with `packages/react`, and the order is: the rules first, into
+this file as a conditional section like [Where stories go](#where-stories-go);
+the [`add-component`](packages/react/.claude/skills/add-component/SKILL.md)
+skill only after that, so a generalised procedure has somewhere to point. Moving
+it earlier means trading the concrete file names that make it useful for a
+package that does not exist yet.
+
+## Skills
+
+Some guidance is too long to keep here and is only needed for one kind of task.
+It lives in `SKILL.md` files under `<package>/.claude/skills/<name>/`. The
+directory name is Claude Code's, but the files are plain markdown with a short
+YAML header — **read the one that matches what you are doing, whatever tool you
+are**:
+
+| Skill | Read it when |
+| --- | --- |
+| [`tokens`](packages/theme/.claude/skills/tokens/SKILL.md) | Writing or reviewing UI code — which colour, spacing, radius, type or shadow token to reach for. Applies in `packages/react` as much as in `packages/theme`, despite where it sits. |
+| [`add-component`](packages/react/.claude/skills/add-component/SKILL.md) | Adding a component to `@trailpack-ui/react` — the order of steps that avoids rework. |
+
+They carry procedure and reference, never rules: anything you must not get wrong
+is in an `AGENTS.md`, which is always loaded. A skill that starts restating one
+has drifted.
 
 ## Environment
 
@@ -37,16 +56,14 @@ a `CLAUDE.md` that does nothing but `@AGENTS.md`.
 
 ## Critical: npm cannot run from the repository root
 
-The root `package.json` declares `devEngines.packageManager = pnpm`. As a
-result **every** `npm` command invoked with the repository root as its working
-directory exits with `EBADDEVENGINES`, including read-only ones:
+`devEngines.packageManager = pnpm` in the root `package.json` makes **every**
+`npm` command fail there with `EBADDEVENGINES`, read-only ones included. `cd`
+into a package first.
 
 ```sh
 npm view vite version                       # from the root  → exit 1, EBADDEVENGINES
 cd packages/theme && npm view vite version  #                → exit 0
 ```
-
-Always `cd` into a package directory before running `npm`.
 
 ## Git
 
@@ -62,19 +79,11 @@ it. Ask again for the next one.
 
 ## Changesets
 
-**Changesets are on hold for now — ignore them entirely.** Nothing has been
-published yet, so there is no released version for a bump to be relative to and
-no consumer for a changelog entry to inform. Adding one per change at this stage
-is pure overhead.
-
-So: do not create a changeset, and do not suggest one either. The setup stays in
-the repository and is picked up again once the first release approaches; the
-maintainer will say when that is.
-
-When that happens, the rule reverts to: never create a changeset unless asked.
-The bump level is a release decision, not a mechanical consequence of the diff —
-a removed export is formally a `major`, but the maintainer may still want it
-released as a `minor`, because pre-1.0 a `major` means committing to 1.0.0.
+**On hold — do not create one, and do not suggest one either.** Nothing has been
+published, so there is no released version for a bump to be relative to. The
+setup stays in the repository; the maintainer will say when releases start, and
+the rule then reverts to: never create a changeset unless asked, because the
+bump level is a release decision. See [Releasing](README.md#releasing).
 
 ## Two rules that apply to every change
 
@@ -86,19 +95,14 @@ released as a `minor`, because pre-1.0 a `major` means committing to 1.0.0.
 
 ## Functions
 
-**Write arrow functions.** `const render = (x: string) => …` is the default
-form everywhere — module scope, callbacks, components, test helpers.
+**Write arrow functions.** `const render = (x: string) => …` is the default form
+everywhere — module scope, callbacks, components, test helpers.
 
-Reach for the `function` keyword only where it buys something the arrow cannot:
-
-- **Hoisting**, when a function is genuinely used above its definition and
-  reordering the file would make it read worse.
-- **`this`**, when a caller binds it — a plugin hook, a `mocha`-style callback.
-- **Generators**, which have no arrow form.
-- **Overload signatures**, which have to be declarations.
-
-"It has always been written that way" is not one of those. If a `function` in a
-diff has no such reason, it is an arrow.
+Reach for `function` only where it buys something the arrow cannot: hoisting,
+when a function is genuinely used above its definition and reordering would read
+worse; `this`, when a caller binds it; generators; overload signatures. "It has
+always been written that way" is not one of those — a `function` in a diff with
+no such reason is an arrow.
 
 ## Comments
 
@@ -108,34 +112,27 @@ padded with them takes longer to understand than the same file without.
 
 The bar is *why*, not *what*. A comment earns its place when it records
 something the reader cannot recover from the code — a constraint from outside
-the file, an alternative that was tried and rejected, a consequence that only
-shows up somewhere else. Everything else is noise:
+the file, an alternative that was tried and rejected, a consequence that shows
+up somewhere else. Restating the code, captioning a block (`// imports`),
+repeating a descriptive name, or documenting what a change *is* are all noise;
+the last belongs in the commit message.
 
-- Restating the code in prose (`// increment the counter`).
-- Captioning an obvious block (`// imports`, `// helper functions`).
-- Repeating a name that is already descriptive.
-- Documenting what a change *is*. That belongs in the commit message.
+Keep length in proportion: a paragraph above four lines of configuration means
+the reasoning belongs in the README, and inline it can almost always be two
+lines instead of ten. Do not narrate absence — explaining why something is *not*
+in the file is worth it only when a reader is likely to add it back and break
+something.
 
-Keep length in proportion. A paragraph above four lines of configuration is a
-sign the reasoning belongs in the README or a commit message, not inline — and
-if it must stay inline, it can almost always be two lines instead of ten.
-
-Do not narrate absence. Explaining why something is *not* in the file is worth
-it only when a reader is genuinely likely to add it back and break something;
-otherwise it is a comment about a file that does not exist.
-
-Same rule when editing: if a change makes an existing comment wrong, fix it or
-delete it. A stale comment is worse than none, because it is trusted.
-
-None of this restricts doc comments on exported API — a `/** */` on an exported
-symbol is part of the package's surface, and those stay.
+If a change makes an existing comment wrong, fix it or delete it. A stale
+comment is worse than none, because it is trusted. None of this restricts doc
+comments on exported API; a `/** */` on an exported symbol is part of the
+package's surface, and those stay.
 
 ## Where stories go
 
-A story lives next to what it documents, not in a directory that exists only to
-hold stories.
-
-For a package that ships components, that is the component's own folder:
+**A story lives next to what it documents, not in a directory that exists only
+to hold stories.** In a package that ships components, that is the component's
+own folder:
 
 ```
 src/components/Button/
@@ -146,20 +143,13 @@ src/components/Button/
     Button.mdx
 ```
 
-The `storybook/` folder is the one exception, and only for prose that does not
-fit in the stories themselves — usage rules, dos and don'ts, migration notes. A
-component without such a page does not get an empty folder.
+`storybook/` is the one exception, for prose that does not fit in the stories —
+usage rules, dos and don'ts, migration notes. No such page, no empty folder.
 
-A story that documents no component in particular belongs with the Storybook
-configuration in `.storybook`. The package overview — the MDX that renders
-`README.md` as the landing page — is the case both packages have.
+A story documenting no component in particular goes to `.storybook`, with the
+configuration; the overview page that renders `README.md` is the case both
+packages have. `packages/theme` keeps a `src/stories` directory because it ships
+no components at all — that is the rule's fallback, not an exception to it.
 
-`packages/theme` keeps a `src/stories` directory, and that is not an exception:
-it ships no components, so its stories document the package itself and have no
-folder to sit beside. In a package that *does* have components, reintroducing
-that directory is not a shortcut — it separates a story from the thing it
-documents, which is how the two drift apart.
-
-Story helpers stay inside the story that uses them until a second story
-genuinely needs the same thing. A shared helper module for one caller is
-indirection without a reason.
+Story helpers stay inside the story that uses them until a second story needs
+the same thing.
