@@ -1,6 +1,6 @@
 /**
  * Markdown rendering for `src/guidance.ts`, shared by the generators that emit
- * it: `generate-tokens.ts` for readers and `generate-skill.ts` for agents.
+ * it: `generateTokens.ts` for readers and `generateSkill.ts` for agents.
  *
  * The two outputs cannot drift because they render the same source; rendering
  * through the same functions is what also keeps them the same shape.

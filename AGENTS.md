@@ -123,6 +123,22 @@ comment is worse than none, because it is trusted. None of this restricts doc
 comments on exported API; a `/** */` on an exported symbol is part of the
 package's surface, and those stay.
 
+## File names
+
+**camelCase, with components the one exception** — they are PascalCase, after
+the component they export: `Button.tsx`, `Button.css.ts`, `Button.stories.tsx`.
+Everything else is `useDisclosure.ts`, `renderGuidance.ts`, `cx.ts`, whether or
+not it has a single primary export. No kebab-case, no snake_case.
+
+Directories follow the same rule: `generateTokens/`, and a component's folder
+takes its PascalCase name, `components/Button/`. The one exception is
+`.claude/skills/<name>/`, where the folder name has to match the skill's `name:`
+field and that format is kebab-case — `add-component/`.
+
+Keep the casing of a name stable once chosen. macOS and Windows do not
+distinguish `Foo.ts` from `foo.ts`, so a case-only rename travels badly through
+Git and has to go via a temporary name.
+
 ## Where stories go
 
 **A story lives next to what it documents, not in a directory that exists only

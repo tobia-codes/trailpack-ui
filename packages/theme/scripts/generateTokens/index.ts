@@ -4,7 +4,7 @@
  * what lets the test render the reference without touching the file system.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { renderTokens, tokensPath } from './generate-tokens.ts';
+import { renderTokens, tokensPath } from './generateTokens.ts';
 
 mkdirSync(new URL('.', tokensPath), { recursive: true });
 writeFileSync(tokensPath, renderTokens());

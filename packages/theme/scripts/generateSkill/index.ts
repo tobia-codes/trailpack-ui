@@ -4,7 +4,7 @@
  * what lets the test render the skill without touching the file system.
  */
 import { writeFileSync } from 'node:fs';
-import { renderSkill, skillPath } from './generate-skill.ts';
+import { renderSkill, skillPath } from './generateSkill.ts';
 
 writeFileSync(skillPath, renderSkill());
 console.log(`Wrote ${skillPath.pathname}`);

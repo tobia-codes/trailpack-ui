@@ -170,7 +170,7 @@ Three things render them, and none of them owns them:
 The first two are the same guidance in a different frame — the skill opens with
 rules addressed to whoever is writing the code, `generated/TOKENS.md` with where
 it sits among the others. They render through the same functions in
-`scripts/lib/render-guidance.ts`, so they cannot differ in shape either.
+`scripts/lib/renderGuidance.ts`, so they cannot differ in shape either.
 `pnpm generate` writes both.
 
 Prose in the guidance marks code with backticks, because every renderer needs it

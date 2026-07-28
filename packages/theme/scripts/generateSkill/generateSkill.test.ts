@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { renderSkill, skillPath } from './generate-skill.ts';
+import { renderSkill, skillPath } from './generateSkill.ts';
 
 test('the committed skill matches src/guidance.ts', () => {
   const committed = readFileSync(skillPath, 'utf8');

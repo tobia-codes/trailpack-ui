@@ -8,7 +8,7 @@
  */
 import type { GuidanceChapter } from '../../src/guidance.ts';
 import { guidance } from '../../src/guidance.ts';
-import { renderChapters } from '../lib/render-guidance.ts';
+import { renderChapters } from '../lib/renderGuidance.ts';
 
 export const skillPath = new URL('../../.claude/skills/tokens/SKILL.md', import.meta.url);
 

@@ -31,7 +31,7 @@ Several things about it are easy to break:
 - **Token usage guidance is written once, in `src/guidance.ts`.** The Storybook
   tables, `generated/TOKENS.md` and the agent skill at
   `.claude/skills/tokens/SKILL.md` are all renderings of it, the last two
-  through the shared functions in `scripts/lib/render-guidance.ts`. Never edit a
+  through the shared functions in `scripts/lib/renderGuidance.ts`. Never edit a
   generated file by hand.
 - **`pnpm generate` runs both generators**, and each has a test that fails if its
   committed output is stale. So a new token means the token, the guidance and
