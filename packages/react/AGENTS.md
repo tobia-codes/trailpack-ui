@@ -27,18 +27,25 @@ short form:
 - A purely presentational component does **not** get one, even if it takes an
   `onClick`. It works on both sides that way; the caller passing the handler is
   the boundary.
-- `src/index.ts` never gets one. A directive on the barrel makes the entire
-  package a client boundary for every consumer.
+- No barrel ever gets one — not `src/index.ts`, not the per-group
+  `src/{components,utils}/index.ts` behind the subpath exports. A directive
+  there makes everything imported through it a client boundary for every
+  consumer.
 
-`src/boundaries.test.ts` asserts exactly this, in both directions, and then
-asserts that the directives survive into `dist/`. It is not a formality — it
-is the only thing standing between a stray `useState` and every consumer's
-bundle growing silently. **Run `pnpm test` after adding or changing a
-component.**
+**Nothing enforces this automatically.** `src/boundaries.test.ts` used to, in
+both directions and through into `dist/`; it was removed along with the two
+hooks that were its only client modules. Today the package contains no
+`'use client'` at all and is server-safe end to end, so the rule is upheld by
+reading it — and a stray `useState` would grow every consumer's bundle with no
+error anywhere. **The first module that needs the directive should bring the
+test back**, along with a `turbo.json` here adding `build` to the `test` task's
+`dependsOn`, because it reads `dist/`.
 
 Adding state to an existing server-safe component is a real decision, not a
 detail: it moves that component and everything rendered with it into the client
-graph. Prefer lifting the state into a hook the consumer calls.
+graph. Prefer lifting the state into a hook the consumer calls — the package
+has no `src/hooks` at the moment, so that means creating it, with its own
+barrel and a `./hooks` export path.
 
 ## Where a component's files go
 
@@ -76,10 +83,17 @@ decisions are actually made.
 - **`dist/styles.css` is an export path in `package.json`, so its filename is
   public API.** It is pinned via `build.lib.cssFileName`; nothing in the output
   may be content-hashed.
-- **What gets published is whatever `src/index.ts` reaches.**
-  `tsconfig.build.json` narrows `include` to that one entry, so stories and
-  tests are never in the program. A new export path in `package.json` needs a
-  new entry there too.
+- **What gets published is whatever the entry points reach.**
+  `tsconfig.build.json` narrows `include` to them, so stories and tests are
+  never in the program. The package has three — `src/index.ts` and the two
+  group barrels behind `./components` and `./utils` — and they are listed in
+  **three** places that have to agree: `exports` in `package.json`,
+  `build.lib.entry` in `vite.config.ts`, `include` in `tsconfig.build.json`.
+  Miss the last one and the subpath ships without declarations, which nothing
+  fails on until a consumer imports it.
+- **A new component or hook is exported from its group barrel, not from
+  `src/index.ts`.** The root re-exports the groups with `export *`; exporting
+  in both places is how a symbol ends up published twice.
 - `react` and `@trailpack-ui/theme` are **peer** dependencies and must stay
   that way. The theme especially: a second copy means mismatched
   vanilla-extract hashes and silently unstyled components. They are listed
@@ -90,7 +104,11 @@ decisions are actually made.
 
 ## Tests
 
-`pnpm test` runs against `dist/`, so the package's own `turbo.json` adds
-`build` to the `test` task's `dependsOn` — the root config only waits for
-_dependencies'_ builds. If a test starts failing on a missing `dist/` file,
-that wiring is what to check.
+There are none at present, and `test` carries `--passWithNoTests` so the script
+and the Turborepo task stay green. Vitest is still installed, so a suite is one
+file away.
+
+A test that reads `dist/` — the removed boundary test did — needs a `turbo.json`
+in this package adding `build` to the `test` task's `dependsOn`. The root config
+only waits for _dependencies'_ builds, not this package's own. If a test starts
+failing on a missing `dist/` file, that wiring is what is missing.

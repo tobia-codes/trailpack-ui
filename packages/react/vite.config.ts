@@ -27,7 +27,13 @@ export default defineConfig({
   build: {
     sourcemap: true,
     lib: {
-      entry: { index: 'src/index.ts' },
+      // One per `exports` entry in package.json; tsconfig.build.json lists the
+      // same four, or the subpath ships without declarations.
+      entry: {
+        index: 'src/index.ts',
+        'components/index': 'src/components/index.ts',
+        'utils/index': 'src/utils/index.ts',
+      },
       formats: ['es'],
       cssFileName: 'styles',
     },

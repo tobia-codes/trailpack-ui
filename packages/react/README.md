@@ -65,6 +65,22 @@ export const Actions = () => (
 Dark mode is the theme's, unchanged: put `darkTheme` on any element and
 everything below it switches. See the [theme README](../theme#dark-mode).
 
+### Entry points
+
+Everything is reachable from the package root. The two subpaths export the same
+symbols, grouped:
+
+```ts
+import { Button } from '@trailpack-ui/react/components';
+import { cx } from '@trailpack-ui/react/utils';
+```
+
+Reach for them when you want the grouping to be visible at the import site.
+They are not needed for tree-shaking: the build emits one file per module and
+the package declares `sideEffects: ["*.css"]`, so a bundler drops what you do
+not use whichever path you import from. `styles.css` is unaffected either way —
+it stays one stylesheet, imported once.
+
 ## Server rendering and Next.js
 
 `'use client'` is often read as "this does not render on the server". It does
@@ -73,12 +89,15 @@ HTML on the server, and _additionally_ shipped to the browser and hydrated. What
 it costs is the JavaScript, not the server pass.
 
 So this package puts the directive on the modules that genuinely need it, and
-nowhere else:
+nowhere else. **Right now that is no module at all**: nothing here calls
+React's runtime, so the package carries no `'use client'` and is server-safe
+end to end. The rule is what matters, because the first component that holds
+state changes the picture:
 
-| Module                           | Directive | Why                                                       |
-| -------------------------------- | --------- | --------------------------------------------------------- |
-| `Button`, `cx`                   | no        | No state, no effects, no browser APIs                     |
-| `useDisclosure`, `useMediaQuery` | **yes**   | Call React's runtime — `useState`, `useSyncExternalStore` |
+| Module                           | Directive | Why                                                |
+| -------------------------------- | --------- | -------------------------------------------------- |
+| `Button`, `cx`                   | no        | No state, no effects, no browser APIs              |
+| a module calling React's runtime | **yes**   | `useState`, `useEffect`, `useSyncExternalStore`, … |
 
 The consequence is worth being precise about, because it is the whole point:
 
@@ -102,7 +121,7 @@ module and the module graph decides.
 `'use client'` is a string literal at the top of a file. A bundler without an
 RSC graph — a Vite SPA, Remix, Astro, webpack — evaluates it as an expression
 with no effect and moves on. **One build serves every target**; there is no
-second entry point and no `react-server` export condition.
+separate server build and no `react-server` export condition.
 
 The only trace it leaves elsewhere is that some bundlers warn that module-level
 directives have no effect when bundling. Cosmetic, and suppressible.
@@ -112,12 +131,6 @@ to HTML on a server — Remix, Astro, the Next Pages Router, your own
 `renderToString` — works throughout this package regardless of any directive.
 The directive only ever concerns React Server Components.
 
-`useMediaQuery` is the one place where SSR needs care, and it handles it:
-`matchMedia` does not exist on the server, so its server snapshot is `false`
-and the real value resolves on the pass right after hydration. That keeps the
-markup consistent, but it means the hook cannot decide what renders at all on a
-first paint.
-
 ## API
 
 **Components** — `Button`, in every tone the token set carries, with `solid`,
@@ -126,9 +139,6 @@ first paint.
 Components take the props of the element they render, so `className`, `ref`,
 `id`, `aria-*` and handlers pass straight through. `className` is appended, not
 replaced.
-
-**Hooks** — `useDisclosure` (open/closed state with stable callbacks),
-`useMediaQuery`.
 
 **Utilities** — `cx`, which joins class names and drops the falsy ones.
 
@@ -147,27 +157,34 @@ pnpm dev              # Storybook on :6007
 pnpm build            # dist/ — one file per module, styles.css and declarations
 pnpm build:storybook  # storybook-static/
 pnpm lint
-pnpm test             # the 'use client' boundary assertions
+pnpm test             # vitest — no suites at present, see below
 pnpm format
 ```
 
 `packages/theme` has to be built first — Storybook and the build both consume
-its `dist`, exactly as a consuming app would. From the root, `pnpm build` and
-`pnpm test` handle that ordering through Turborepo.
+its `dist`, exactly as a consuming app would. From the root, `pnpm build`
+handles that ordering through Turborepo.
+
+The package has no test suites right now. It had one, `src/boundaries.test.ts`,
+which asserted the `'use client'` rule above in both directions and checked
+that the directives survived into `dist/`; it went when the two hooks that were
+its only client modules did. Nothing enforces the rule automatically today — a
+misplaced directive is caught by review, not by CI. Worth restoring the test
+along with the first module that carries one, and note that it read `dist/`, so
+it needed a `turbo.json` in this package adding `build` to the `test` task's
+`dependsOn`.
 
 ### Why the build emits one file per module
 
 `build.rollupOptions.output.preserveModules` is not an optimisation here, it is
 a requirement. Bundled into a single `index.js` there would be exactly one place
 to put a directive — and therefore only the choice between "the entire package
-is a client boundary" and "none of it is". Per-module output is what lets
-`useDisclosure` carry one while `Button` does not.
+is a client boundary" and "none of it is". Per-module output is what lets a
+stateful module carry one while `Button` does not.
 
 Vite 8 (on Rolldown) preserves the directives as they are; no plugin is needed
-for it. `src/boundaries.test.ts` asserts both halves of that — that a module
-declares the directive exactly when it touches React's runtime, and that the
-declaration survives into `dist/`. If a future toolchain silently drops them,
-that test fails rather than a consumer's app.
+for it. That it keeps doing so is currently unverified — see the note on the
+missing test above.
 
 ### Why the CSS filename is pinned
 

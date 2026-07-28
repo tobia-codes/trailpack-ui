@@ -27,8 +27,10 @@ Ask only this: **does the module itself call React's runtime** — `useState`,
 - **Yes** → `'use client';` as the first line of the `.tsx`.
 
 Prefer the first. If a component needs state, consider whether the state can
-live in a hook under `src/hooks` that the consumer calls, leaving the component
-itself universal.
+live in a hook the consumer calls, leaving the component itself universal.
+There is no `src/hooks` at the moment, so that means creating it: a barrel
+beside the hook, a `./hooks` entry in `exports`, `build.lib.entry` and
+`tsconfig.build.json`.
 
 ## 2. Create the folder
 
@@ -39,7 +41,8 @@ src/components/<Name>/
   <Name>.stories.tsx
 ```
 
-No `index.ts` per folder — the barrel imports the file directly.
+No `index.ts` per component folder — `src/components/index.ts` imports the file
+directly.
 
 ## 3. Write `<Name>.css.ts`
 
@@ -78,15 +81,16 @@ Helpers (a tone list, layout objects) stay in the story file until a second
 story needs them. Only add a `storybook/` folder if the component needs written
 documentation beyond its stories.
 
-## 6. Export from `src/index.ts`
+## 6. Export from `src/components/index.ts`
 
 The component and its public prop types, alphabetically among the existing
-components. `src/index.ts` never carries `'use client'` — the barrel is not a
-boundary.
+components. That is the only place to add it — `src/index.ts` re-exports the
+group with `export *`, so the package root picks it up on its own. No barrel
+ever carries `'use client'`; none of them is a boundary.
 
-Nothing the barrel does not reach is published: `tsconfig.build.json` builds
-from that one entry, so a component that is not exported ships nothing, and the
-story next to it is never in the program.
+Nothing a barrel does not reach is published: `tsconfig.build.json` builds from
+the entry points alone, so a component that is not exported ships nothing, and
+the story next to it is never in the program.
 
 ## 7. Run the checks
 
@@ -94,11 +98,15 @@ story next to it is never in the program.
 pnpm build && pnpm test && pnpm lint && pnpm format
 ```
 
-`src/boundaries.test.ts` is the one that matters here. It asserts that a module
-declares `'use client'` exactly when it touches React's runtime, and that the
-directive survives into `dist/`. If step 1 was answered wrong, this is where it
-surfaces — a mismatch means the component and the directive disagree, not that
-the test is too strict.
+The package has no test suites at present, so `pnpm test` passes vacuously and
+step 1 goes unchecked. `src/boundaries.test.ts` used to catch a wrong answer
+there — it asserted that a module declares `'use client'` exactly when it
+touches React's runtime, and that the directive survives into `dist/`. It was
+removed with the hooks it covered. **If your component carries a directive, it
+is the first one in the package again: bring that test back with it**, plus a
+`turbo.json` here adding `build` to the `test` task's `dependsOn`, since it
+reads `dist/`. Until then, check by hand that `dist/<Name>/<Name>.js` starts
+with the directive and that no barrel does.
 
 Then `pnpm dev` and look at the story in both themes via the toolbar. Nothing
 verifies that a story renders; a broken one fails in the browser, not in CI.
