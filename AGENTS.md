@@ -30,10 +30,9 @@ this file before the skill that points at them.
 ## Skills
 
 Some guidance is too long to keep here and is only needed for one kind of task.
-It lives in `SKILL.md` files under `<package>/.claude/skills/<name>/`. The
-directory name is Claude Code's, but the files are plain markdown with a short
-YAML header — **read the one that matches what you are doing, whatever tool you
-are**:
+It lives in `SKILL.md` files with a short YAML header. The directory name is
+Claude Code's, but the files are plain markdown — **read the one that matches
+what you are doing, whatever tool you are**:
 
 | Skill | Read it when |
 | --- | --- |
@@ -43,6 +42,28 @@ are**:
 They carry procedure and reference, never rules: anything you must not get wrong
 is in an `AGENTS.md`, which is always loaded. A skill that starts restating one
 has drifted.
+
+### Two locations, and which one a skill belongs in
+
+`<package>/.claude/skills/<name>/` is where Claude Code discovers skills for
+work **in this repository**, and it is the default. Both skills above are there.
+
+[`skills/`](skills/README.md) at the root is a second, tool-neutral catalogue,
+for guidance that is useful **without this repository checked out** — a consumer
+of the published packages, whatever assistant they run. Only `tokens` qualifies;
+`add-component` is about editing `packages/react` and would mean nothing in
+someone else's project.
+
+`tokens` therefore exists in both places, byte-identical, because neither
+location can serve the other's audience. That duplication is generated, not
+maintained: `pnpm generate:skill` in `packages/theme` writes both from
+`src/guidance.ts`, and a test fails if either goes stale. **Never edit a
+generated `SKILL.md` or `metadata.json` by hand** — see
+[packages/theme/AGENTS.md](packages/theme/AGENTS.md).
+
+A skill scoped to one package starts under that package. Promote it to the root
+catalogue only when a consumer would need it, and add it to both tables when you
+do — nothing generates either.
 
 ## Environment
 
@@ -131,9 +152,10 @@ Everything else is `useDisclosure.ts`, `renderGuidance.ts`, `cx.ts`, whether or
 not it has a single primary export. No kebab-case, no snake_case.
 
 Directories follow the same rule: `generateTokens/`, and a component's folder
-takes its PascalCase name, `components/Button/`. The one exception is
-`.claude/skills/<name>/`, where the folder name has to match the skill's `name:`
-field and that format is kebab-case — `add-component/`.
+takes its PascalCase name, `components/Button/`. The one exception is a skill
+directory — `.claude/skills/<name>/` or `skills/<name>/` — where the folder name
+has to match the skill's `name:` field and that format is kebab-case —
+`add-component/`.
 
 Keep the casing of a name stable once chosen. macOS and Windows do not
 distinguish `Foo.ts` from `foo.ts`, so a case-only rename travels badly through

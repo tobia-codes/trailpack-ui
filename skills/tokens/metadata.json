@@ -1,0 +1,11 @@
+{
+  "name": "tokens",
+  "package": "@trailpack-ui/theme",
+  "packageVersion": ">=0.1.0 <0.2.0",
+  "organization": "Trailpack",
+  "abstract": "Picks the right Trailpack design token by the role an element plays — tone, colour, space, radius, icon size, focus ring, type, shadow or stacking order — and states the pairings that are contrast-checked in both themes.",
+  "references": [
+    "https://github.com/tobia-codes/trailpack-ui/tree/main/packages/theme",
+    "https://github.com/tobia-codes/trailpack-ui/blob/main/packages/theme/generated/TOKENS.md"
+  ]
+}

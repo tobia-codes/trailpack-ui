@@ -1,10 +1,25 @@
 /**
  * Entry point for `pnpm generate:skill`. The rendering lives next door and
- * returns a string; writing it is the only thing that happens here, which is
- * what lets the test render the skill without touching the file system.
+ * returns strings; writing them is the only thing that happens here, which is
+ * what lets the test render every output without touching the file system.
  */
-import { writeFileSync } from 'node:fs';
-import { renderSkill, skillPath } from './generateSkill.ts';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import {
+  catalogMetadataPath,
+  catalogSkillPath,
+  renderMetadata,
+  renderSkill,
+  skillPath,
+} from './generateSkill.ts';
 
-writeFileSync(skillPath, renderSkill());
-console.log(`Wrote ${skillPath.pathname}`);
+const outputs = [
+  [skillPath, renderSkill()],
+  [catalogSkillPath, renderSkill()],
+  [catalogMetadataPath, renderMetadata()],
+] as const;
+
+for (const [path, contents] of outputs) {
+  mkdirSync(new URL('.', path), { recursive: true });
+  writeFileSync(path, contents);
+  console.log(`Wrote ${path.pathname}`);
+}

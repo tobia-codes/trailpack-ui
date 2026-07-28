@@ -1,16 +1,29 @@
 /**
- * Renders `src/guidance.ts` into the agent skill at
- * `.claude/skills/tokens/SKILL.md`. Written by `index.ts`, run with
- * `pnpm generate:skill`.
+ * Renders `src/guidance.ts` into the agent skill, in both places it is served
+ * from. Written by `index.ts`, run with `pnpm generate:skill`.
  *
- * The test beside this file fails if the committed skill no longer matches, so
- * the guidance and the skill cannot drift.
+ * The test beside this file fails if any committed output no longer matches, so
+ * the guidance, the skill and its metadata cannot drift.
  */
+import { readFileSync } from 'node:fs';
 import type { GuidanceChapter } from '../../src/guidance.ts';
 import { guidance } from '../../src/guidance.ts';
 import { renderChapters } from '../lib/renderGuidance.ts';
 
+/** Loaded by Claude Code for work inside this repository. */
 export const skillPath = new URL('../../.claude/skills/tokens/SKILL.md', import.meta.url);
+
+/**
+ * The repository-root catalogue, which is the copy a consumer of the package
+ * finds. Byte-identical to the one above on purpose: two renderings of the same
+ * guidance that differed would be worse than one that is duplicated.
+ */
+export const catalogSkillPath = new URL('../../../../skills/tokens/SKILL.md', import.meta.url);
+
+export const catalogMetadataPath = new URL(
+  '../../../../skills/tokens/metadata.json',
+  import.meta.url,
+);
 
 const frontmatter = `---
 name: tokens
@@ -71,4 +84,40 @@ export const renderSkill = () => {
     '<!-- Generated from packages/theme/src/guidance.ts by `pnpm generate:skill`. Do not edit. -->';
 
   return `${[frontmatter, generated, preamble, body].join('\n\n')}\n`;
+};
+
+/**
+ * The range of `@trailpack-ui/theme` this guidance describes. Below 1.0 a minor
+ * bump is the breaking one, so that is where the range has to close.
+ */
+const compatibleRange = (version: string) => {
+  const [major, minor] = version.split('.').map(Number);
+
+  return major === 0 ? `>=${version} <0.${minor + 1}.0` : `>=${version} <${major + 1}.0.0`;
+};
+
+/**
+ * The machine-readable half of the catalogue entry. It carries a range rather
+ * than a version of its own: the guidance has no lifecycle apart from the
+ * package it describes, and a second number would only be a second thing to
+ * forget. Read from `package.json`, so a release moves it with no hand edit.
+ */
+export const renderMetadata = () => {
+  const pkg = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'));
+
+  return `${JSON.stringify(
+    {
+      name: 'tokens',
+      package: pkg.name,
+      packageVersion: compatibleRange(pkg.version),
+      organization: 'Trailpack',
+      abstract:
+        'Picks the right Trailpack design token by the role an element plays — tone, colour, space, radius, icon size, focus ring, type, shadow or stacking order — and states the pairings that are contrast-checked in both themes.',
+      // `homepage` points at the package directory, which GitHub serves with
+      // `tree`. A file under it needs `blob`.
+      references: [pkg.homepage, `${pkg.homepage.replace('/tree/', '/blob/')}/generated/TOKENS.md`],
+    },
+    null,
+    2,
+  )}\n`;
 };

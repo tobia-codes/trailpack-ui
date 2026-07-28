@@ -29,11 +29,17 @@ pnpm --filter @trailpack-ui/react dev  # :6007
 ```
 packages/*          publishable packages (theme, react)
 apps/*              applications (none yet, but part of the workspace globs)
+skills/             agent guidance for building with the packages
 .changeset/         pending changesets + config
 .github/workflows/  CI
 ```
 
 The root `package.json` is `private: true` and is never published.
+
+[`skills/`](skills/README.md) is guidance for AI agents working in a project
+that *consumes* these packages — plain markdown, no assistant in particular.
+Guidance for working on the monorepo itself lives beside the code it applies to;
+[AGENTS.md](AGENTS.md#skills) covers the split.
 
 ## Environment
 

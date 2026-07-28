@@ -1,38 +1,51 @@
-<!-- Generated from packages/theme/src/guidance.ts by `pnpm generate:tokens`. Do not edit. -->
+---
+name: tokens
+description: >-
+  Use when writing or reviewing UI code in a project that depends on
+  @trailpack-ui/theme — picking colours, spacing, radii, type, shadows, icon
+  sizes, focus rings or stacking order. Says which token to reach for and why,
+  so components stay correct in both the light and the dark theme.
+---
 
-# Token reference
+<!-- Generated from packages/theme/src/guidance.ts by `pnpm generate:skill`. Do not edit. -->
 
-Every token in `@trailpack-ui/theme`, and the rule for when to reach for it.
-For installing the package, importing the stylesheet and switching themes, see
-the [README](../README.md).
+# Trailpack design tokens
 
-Three things render this guidance, and none of them owns it: this file, the
-Storybook reference (`pnpm dev`, which shows every token at its real value in
-both themes), and the agent skill — served both from
-`.claude/skills/tokens/SKILL.md` for work in this repository and from
-[`skills/tokens/`](../../../skills/README.md) at the repository root.
+Every value a component needs comes from `@trailpack-ui/theme`. Import the
+stylesheet once at the app root, then read values through `vars`:
 
-## Tokens
+```ts
+import '@trailpack-ui/theme/theme.css';
+import { vars } from '@trailpack-ui/theme';
+```
 
-### What these are
+`vars` holds plain `var(--…)` strings, so it works in inline styles, in
+`.css.ts` files, and anywhere a CSS value is read from JavaScript —
+vanilla-extract is only needed if the app writes its own `.css.ts`.
 
-Every value a component needs — a colour, a gap, a corner, a type size — comes from this set. A component that writes `#7c3aed` or `12px` directly is a component that will not follow the dark theme and will drift from the rest of the UI the first time a value is adjusted.
+It does **not** work in a hand-written `.css` or `.scss` file: those cannot
+import `vars`, and the variable names are build-time hashes with nothing stable
+to type. Reach the tokens from JavaScript, or alias them once into names the app
+owns.
 
-Reach for tokens by role, not by appearance. The question is never "which grey looks right here" but "what is this element" — a recessed fill, a secondary label, a divider. Pick the token that names that, and both themes come out correct for free.
+Dark mode is a class: put `darkTheme` (exported from the same package) on
+`<html>` for the whole app, or on any subtree to invert just that part.
 
-| Token | Use it for |
-| --- | --- |
-| `tone.*` | The thing carries a meaning: a primary action, an error, a success state. Start here — if a tone fits, nothing else does. |
-| `color.*` | Neutral chrome with no meaning attached: the page, cards, dividers, body and secondary text. |
-| `space, radius, font, iconSize, shadow, zIndex` | Geometry and type. Never theme-dependent except for shadows. |
+## The rules that decide most questions
 
-> The paths on `vars` are the public API. The CSS variable names behind them are vanilla-extract hashes and can change between releases — always go through `vars`, never type a `var(--…)` by hand.
-
-### Light and dark
-
-There is one contract and two sets of values. The light theme sits on `:root`, the dark theme is a class you put on any element. Nothing in a component needs to know which is active — that is the whole point of going through the tokens.
-
-> Every colour pairing this set promises — `onSolid` on `solid`, `onSubtle` on `subtle`, `text` on the three page surfaces — is asserted against WCAG AA in `src/themes.test.ts`, in both themes. Combinations outside those pairs are not covered, which is the reason to stay inside them.
+1. **Never write a raw hex, `px`, or `z-index` in a component.** If no token
+   fits, that is a gap in the token set — raise it, do not work around it.
+2. **Pick by role, not by appearance.** Ask what the element *is* — a recessed
+   fill, a secondary label, a divider — not which colour looks right.
+3. **Stay inside the tested pairs.** `onSolid` goes on `solid`, `onSubtle` on
+   `subtle`, `text` on a page surface. Other combinations are not
+   contrast-checked and are how AA failures get in.
+4. **`tone.*.solid` is a background, never a text colour.** Use `tone.*.text`
+   for tinted text.
+5. **Never type a `var(--…)` by hand.** The variable names are build-time
+   hashes; only the paths on `vars` are stable. If a file cannot import
+   `vars`, it cannot use these tokens — that is a signal to move the styling,
+   not to copy a hash.
 
 ## Color
 
