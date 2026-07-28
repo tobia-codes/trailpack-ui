@@ -38,32 +38,13 @@ graph. Prefer lifting the state into a hook the consumer calls.
 
 ## Where a component's files go
 
-Everything belonging to a component lives in its own folder under
-`src/components`, **including its stories**. There is no `src/stories`
-directory, and adding one back is not a shortcut — it separates a story from
-the component it documents, which is exactly how the two drift apart.
+Component, styles and story share one folder under `src/components` — see
+[Where stories go](../../AGENTS.md#where-stories-go) for the rule and its one
+exception. This package has components, so it applies here in full: there is no
+`src/stories` directory.
 
-```
-src/components/Button/
-  Button.tsx
-  Button.css.ts
-  Button.stories.tsx
-  storybook/            only when the component needs custom documentation
-    Button.mdx
-```
-
-The `storybook/` folder is the single exception, and only for prose that will
-not fit in the stories themselves — an MDX page with usage rules, dos and
-don'ts, migration notes. A component without such a page does not get an empty
-folder.
-
-Two things sit outside that rule because they belong to nothing in particular:
-the package overview (`.storybook/readme.mdx`, which renders `README.md`) and
-the theme decorator, both under `.storybook` with the configuration.
-
-Story helpers stay inside the story that uses them until a second story
-genuinely needs the same thing. A shared helper module for one caller is
-indirection without a reason.
+The theme decorator and the package overview live in `.storybook`, with the
+configuration they belong to.
 
 ## Styling
 

@@ -16,10 +16,19 @@ them is that `react` takes `theme` as a peer dependency; there is no shared
 config package, and one is not the default — add it only when something is
 actually duplicated three times over.
 
-`packages/react` has [its own AGENTS.md](packages/react/AGENTS.md). Read it
-before changing anything there: whether a module carries `'use client'` decides
-what lands in a consumer's client bundle, and it is easy to get wrong in a way
-nothing complains about.
+**Every package has its own AGENTS.md, and this file carries only what applies
+repository-wide.** Read the package's before changing anything in it — both
+document a failure that is silent rather than loud:
+
+- [`packages/theme`](packages/theme/AGENTS.md) — the token contract. Guidance is
+  written once and rendered into three places, and a renamed token breaks
+  `packages/react` without an error anywhere.
+- [`packages/react`](packages/react/AGENTS.md) — whether a module carries
+  `'use client'` decides what lands in a consumer's client bundle, and it is
+  easy to get wrong in a way nothing complains about.
+
+A new package gets the same pair: an `AGENTS.md` beside its `package.json`, and
+a `CLAUDE.md` that does nothing but `@AGENTS.md`.
 
 ## Environment
 
@@ -121,32 +130,36 @@ delete it. A stale comment is worse than none, because it is trusted.
 None of this restricts doc comments on exported API — a `/** */` on an exported
 symbol is part of the package's surface, and those stay.
 
-## The theme package
+## Where stories go
 
-`packages/theme` is the token contract. Several things about it are easy to
-break:
+A story lives next to what it documents, not in a directory that exists only to
+hold stories.
 
-- **Token values are asserted, not decorative.** `src/themes.test.ts` checks
-  every colour pairing the token set promises against WCAG AA, in both themes.
-  Changing a hex value without running `pnpm test` is how a contrast regression
-  gets in.
-- **`dist/theme.css` is an export path in `package.json`, so its filename is
-  public API.** It is pinned via `build.lib.cssFileName` in `vite.config.ts`;
-  nothing in the build output may be content-hashed.
-- **What gets published is whatever `src/index.ts` reaches.**
-  `tsconfig.build.json` narrows `include` to that one entry, so the module graph
-  decides the declaration output — `src/stories`, `scripts` and `guidance.ts`
-  are never in the program and need no exclusion, whether they sit under `src`
-  or not. Adding a new export path to `package.json` is therefore the one case
-  that also needs a new entry in `files` there. The package is
-  framework-agnostic in what it ships: React and Storybook are
-  `devDependencies`, and `files` is `["dist"]`. Keep it that way.
-- **Token usage guidance is written once, in `src/guidance.ts`.** The Storybook
-  tables, `generated/TOKENS.md` and the agent skill at
-  `.claude/skills/tokens/SKILL.md` are all renderings of it, the last two
-  through the shared functions in `scripts/lib/render-guidance.ts`. Never edit a
-  generated file by hand.
-- **`pnpm generate` runs both generators**, and each has a test that fails if its
-  committed output is stale. So a new token means the token, the guidance and
-  one command — in the same change, or the reference silently describes a
-  set that no longer exists.
+For a package that ships components, that is the component's own folder:
+
+```
+src/components/Button/
+  Button.tsx
+  Button.css.ts
+  Button.stories.tsx
+  storybook/            only when the component needs custom documentation
+    Button.mdx
+```
+
+The `storybook/` folder is the one exception, and only for prose that does not
+fit in the stories themselves — usage rules, dos and don'ts, migration notes. A
+component without such a page does not get an empty folder.
+
+A story that documents no component in particular belongs with the Storybook
+configuration in `.storybook`. The package overview — the MDX that renders
+`README.md` as the landing page — is the case both packages have.
+
+`packages/theme` keeps a `src/stories` directory, and that is not an exception:
+it ships no components, so its stories document the package itself and have no
+folder to sit beside. In a package that *does* have components, reintroducing
+that directory is not a shortcut — it separates a story from the thing it
+documents, which is how the two drift apart.
+
+Story helpers stay inside the story that uses them until a second story
+genuinely needs the same thing. A shared helper module for one caller is
+indirection without a reason.
