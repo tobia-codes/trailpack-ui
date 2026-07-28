@@ -1,0 +1,9 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+allowBuilds:
+  # Needed for esbuild to link its platform binary during install.
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@vanilla-extract/css@1.21.2'
+  - '@vanilla-extract/vite-plugin@5.2.6'

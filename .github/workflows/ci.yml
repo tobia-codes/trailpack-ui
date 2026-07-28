@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    # `main` runs the same checks in release.yml, which is the one that can stop
+    # a publish.
+    branches: [develop, stage]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      # `!cancelled()` so all three report in one run instead of stopping at the
+      # first failure.
+      - run: pnpm lint
+        if: ${{ !cancelled() }}
+      - run: pnpm test
+        if: ${{ !cancelled() }}
+      - run: pnpm format:check
+        if: ${{ !cancelled() }}

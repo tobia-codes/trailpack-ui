@@ -1,0 +1,50 @@
+{
+  "name": "@trailpack-ui/theme",
+  "version": "0.1.0",
+  "description": "Design token contract, light and dark theme for Trailpack projects, built with vanilla-extract.",
+  "homepage": "https://github.com/tobia-codes/trailpack-ui/tree/main/packages/theme",
+  "bugs": "https://github.com/tobia-codes/trailpack-ui/issues",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tobia-codes/trailpack-ui.git",
+    "directory": "packages/theme"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./theme.css": {
+      "types": "./dist/theme.css.d.ts",
+      "default": "./dist/theme.css"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "prepack": "pnpm build",
+    "lint": "oxlint",
+    "test": "vitest run",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
+  },
+  "devDependencies": {
+    "@vanilla-extract/css": "^1.21.2",
+    "@vanilla-extract/vite-plugin": "^5.2.6",
+    "oxfmt": "^0.60.0",
+    "oxlint": "^1.75.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.0.18"
+  }
+}
