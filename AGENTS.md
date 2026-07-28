@@ -23,14 +23,9 @@ a `CLAUDE.md` containing nothing but `@AGENTS.md`. If it brings a skill, list it
 under [Skills](#skills) too — nothing generates that table.
 
 There is no shared config package, and one is not the default — add it only when
-something is actually duplicated three times over. The same holds for anything
-scoped to one package today. A **second** React package is the trigger to hoist
-what it shares with `packages/react`, and the order is: the rules first, into
-this file as a conditional section like [Where stories go](#where-stories-go);
-the [`add-component`](packages/react/.claude/skills/add-component/SKILL.md)
-skill only after that, so a generalised procedure has somewhere to point. Moving
-it earlier means trading the concrete file names that make it useful for a
-package that does not exist yet.
+something is actually duplicated three times over. That includes rules and
+skills scoped to one package: hoist them on the second real case, rules into
+this file before the skill that points at them.
 
 ## Skills
 
