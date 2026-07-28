@@ -2,10 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
+    "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts"]
+  // Overrides the base config's `include`: what gets published is whatever
+  // `index.ts` reaches, so stories, scripts and `guidance.ts` are never in the
+  // program. A new export path in package.json needs a new entry here too.
+  "include": ["src/index.ts"]
 }

@@ -29,11 +29,8 @@ export default defineConfig({
     lib: {
       entry: { index: 'src/index.ts' },
       formats: ['es'],
-      // The stylesheet name is public API — it is an export path in
-      // package.json — so it must not be derived from the entry name.
       cssFileName: 'theme',
     },
-    // Nothing may be hashed, for the same reason.
     rollupOptions: { output: { assetFileNames: '[name][extname]' } },
   },
 });

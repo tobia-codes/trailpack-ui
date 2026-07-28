@@ -110,8 +110,16 @@ symbol is part of the package's surface, and those stay.
 - **`dist/theme.css` is an export path in `package.json`, so its filename is
   public API.** It is pinned via `build.lib.cssFileName` in `vite.config.ts`;
   nothing in the build output may be content-hashed.
-- **Stories live in `stories/`, not in `src/`.** `tsconfig.build.json` compiles
-  `src` wholesale and only excludes `*.test.ts`, so a story placed under `src`
-  would emit declarations into `dist` and drag React into the published types.
-  The package is framework-agnostic in what it ships — React and Storybook are
-  `devDependencies`, and `files` is `["dist"]`. Keep it that way.
+- **What gets published is whatever `src/index.ts` reaches.**
+  `tsconfig.build.json` narrows `include` to that one entry, so the module graph
+  decides the declaration output — stories, scripts and `guidance.ts` are never
+  in the program and need no exclusion. Adding a new export path to
+  `package.json` is therefore the one case that also needs a new entry in
+  `files` there. The package is framework-agnostic in what it ships: React and
+  Storybook are `devDependencies`, and `files` is `["dist"]`. Keep it that way.
+- **Token usage guidance is written once, in `src/guidance.ts`.** The Storybook
+  tables and the generated agent skill at `.claude/skills/tokens/SKILL.md` are
+  both renderings of it. Never edit the skill by hand — run `pnpm
+  generate:skill`; a test fails if the committed file is stale. Adding or
+  changing a token means updating the guidance in the same change, or the
+  reference silently describes a set that no longer exists.

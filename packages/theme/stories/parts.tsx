@@ -1,5 +1,5 @@
 /**
- * Presentation helpers for the token reference story.
+ * Presentation helpers for the token reference.
  *
  * Everything here is styled with inline `vars`, which is deliberate: the page
  * is also a working demonstration that the tokens need no bundler plugin and
@@ -7,6 +7,7 @@
  */
 import { createContext, type CSSProperties, type ReactNode, use } from 'react';
 import { vars } from '../src/themes.css';
+import type { GuidanceSection } from '../src/guidance';
 import { darkTokens, lightTokens } from '../src/tokens';
 
 const ThemeContext = createContext<'light' | 'dark'>('light');
@@ -32,6 +33,31 @@ export function useTokens() {
 
 const stack = (gap: string): CSSProperties => ({ display: 'flex', flexDirection: 'column', gap });
 
+function Code({ children }: { children: ReactNode }) {
+  return (
+    <code
+      style={{
+        fontFamily: vars.font.family.mono,
+        fontSize: '0.9em',
+        background: vars.color.muted,
+        color: vars.color.foreground,
+        padding: `0 ${vars.space[1]}`,
+        borderRadius: vars.radius.xs,
+      }}
+    >
+      {children}
+    </code>
+  );
+}
+
+// Guidance prose marks code with backticks so the same string can also be
+// emitted as markdown. Odd-indexed splits are the code spans.
+function Inline({ text }: { text: string }) {
+  return (
+    <>{text.split('`').map((part, i) => (i % 2 === 1 ? <Code key={i}>{part}</Code> : part))}</>
+  );
+}
+
 export function Page({ title, children }: { title: string; children: ReactNode }) {
   return (
     <article style={{ maxWidth: '64rem', margin: '0 auto', ...stack(vars.space[16]) }}>
@@ -51,17 +77,12 @@ export function Page({ title, children }: { title: string; children: ReactNode }
   );
 }
 
-// `lead` before `children` on purpose: the guidance is the point of the page,
-// the specimens only make it concrete.
-export function Section({
-  title,
-  lead,
-  children,
-}: {
-  title: string;
-  lead: ReactNode;
-  children: ReactNode;
-}) {
+/**
+ * One section of the reference, driven by `src/guidance.ts`. The layout order
+ * is fixed — lead, rules, specimens, caveats — so that the same data renders
+ * as markdown for the agent skill without a per-section layout hint.
+ */
+export function Section({ section, children }: { section: GuidanceSection; children?: ReactNode }) {
   return (
     <section style={stack(vars.space[6])}>
       <div style={stack(vars.space[3])}>
@@ -73,57 +94,41 @@ export function Section({
             lineHeight: vars.font.lineHeight.tight,
           }}
         >
-          {title}
+          {section.title}
         </h2>
-        <div style={{ ...stack(vars.space[3]), maxWidth: '48rem' }}>{lead}</div>
+        <div style={{ ...stack(vars.space[3]), maxWidth: '48rem' }}>
+          {section.lead.map((paragraph) => (
+            <p key={paragraph} style={{ margin: 0, lineHeight: vars.font.lineHeight.relaxed }}>
+              <Inline text={paragraph} />
+            </p>
+          ))}
+        </div>
       </div>
+
+      {section.rows && <WhenToUse rows={section.rows} />}
       {children}
+
+      {section.notes?.map((note) => (
+        <p
+          key={note}
+          style={{
+            margin: 0,
+            maxWidth: '48rem',
+            color: vars.color.mutedForeground,
+            fontSize: vars.font.size.sm,
+            lineHeight: vars.font.lineHeight.relaxed,
+            borderLeft: `2px solid ${vars.color.border}`,
+            paddingLeft: vars.space[4],
+          }}
+        >
+          <Inline text={note} />
+        </p>
+      ))}
     </section>
   );
 }
 
-export function P({ children }: { children: ReactNode }) {
-  return <p style={{ margin: 0, lineHeight: vars.font.lineHeight.relaxed }}>{children}</p>;
-}
-
-export function Note({ children }: { children: ReactNode }) {
-  return (
-    <p
-      style={{
-        margin: 0,
-        color: vars.color.mutedForeground,
-        fontSize: vars.font.size.sm,
-        lineHeight: vars.font.lineHeight.relaxed,
-        borderLeft: `2px solid ${vars.color.border}`,
-        paddingLeft: vars.space[4],
-      }}
-    >
-      {children}
-    </p>
-  );
-}
-
-export function Code({ children }: { children: ReactNode }) {
-  return (
-    <code
-      style={{
-        fontFamily: vars.font.family.mono,
-        fontSize: '0.9em',
-        background: vars.color.muted,
-        color: vars.color.foreground,
-        padding: `0 ${vars.space[1]}`,
-        borderRadius: vars.radius.xs,
-      }}
-    >
-      {children}
-    </code>
-  );
-}
-
-/** `token` is the path under `vars`; `when` is the rule for reaching for it. */
-export type UseRow = { token: string; when: ReactNode };
-
-export function WhenToUse({ rows }: { rows: readonly UseRow[] }) {
+function WhenToUse({ rows }: { rows: readonly { token: string; when: string }[] }) {
   return (
     <table
       style={{
@@ -166,7 +171,7 @@ export function WhenToUse({ rows }: { rows: readonly UseRow[] }) {
                 lineHeight: vars.font.lineHeight.snug,
               }}
             >
-              {row.when}
+              <Inline text={row.when} />
             </td>
           </tr>
         ))}

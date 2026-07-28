@@ -9,9 +9,12 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "declaration": true,
+    "declaration": false,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    // `scripts/` runs on Node's TypeScript stripping, which resolves imports
+    // literally and so needs the `.ts` extension written out.
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "stories", ".storybook", "vite.config.ts"]
+  "include": ["src", "stories", "scripts", ".storybook", "vite.config.ts"]
 }
