@@ -57,6 +57,9 @@ const preview: Preview = {
 
   parameters: {
     layout: 'fullscreen',
+    // Storybook opens on the first story in the sidebar, so this is what makes
+    // the README the landing page.
+    options: { storySort: { order: ['Overview', 'Foundations'] } },
     // The theme toolbar owns the background; Storybook's own background
     // control would paint over it and desynchronise the two.
     backgrounds: { disable: true },

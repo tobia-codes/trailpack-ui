@@ -153,7 +153,7 @@ pnpm generate         # both generators below
 pnpm generate:tokens  # rewrite generated/TOKENS.md from src/guidance.ts
 pnpm generate:skill   # rewrite .claude/skills/tokens/SKILL.md from src/guidance.ts
 pnpm lint
-pnpm test             # contrast assertions, story rendering, generated-doc freshness
+pnpm test             # contrast assertions, generated-doc freshness
 pnpm format
 ```
 
@@ -190,23 +190,27 @@ the program, and `files` ships only `dist`.
 
 ### Storybook
 
-`pnpm dev` serves the token reference under **Foundations → Tokens**: the same
-guidance as [TOKENS.md](generated/TOKENS.md), but with every token rendered at
-its real value next to the rule for it.
+`pnpm dev` opens on **Overview**, which is this file: `src/stories/readme.mdx`
+reads it with Vite's `?raw` and hands it to the `Markdown` block from
+`@storybook/addon-docs`, so the landing page cannot fall behind the README.
+Relative links are rewritten to the repository there, since they would otherwise
+resolve against Storybook's own URL.
+
+The token reference itself is under **Foundations → Tokens**: the same guidance
+as [TOKENS.md](generated/TOKENS.md), but with every token rendered at its real
+value next to the rule for it.
 
 The toolbar switches between light and dark, and the values printed under each
 swatch follow — the class swap is exactly the one a consuming app does, so what
 you see is what the tokens resolve to.
 
-Two things about how the stories are built are deliberate:
+One thing about how the stories are built is deliberate: **they style themselves
+with inline `vars`**, not with `.css.ts` files. That keeps the reference honest
+about the package's central claim — that the tokens work with no
+vanilla-extract and no bundler plugin in the consumer.
 
-- **They style themselves with inline `vars`**, not with `.css.ts` files. That
-  keeps the reference honest about the package's central claim — that the
-  tokens work with no vanilla-extract and no bundler plugin in the consumer.
-- **`storybook build` does not verify that a story renders**, only that it
-  bundles. `src/stories/smoke.test.tsx` renders each one to a string under
-  `pnpm test`, so a story that throws fails CI instead of failing silently in a
-  browser nobody opened.
+Nothing verifies that a story _renders_. `pnpm build:storybook` only bundles
+them, so a story that throws fails in the browser rather than in CI.
 
 React and Storybook are `devDependencies` here, and `files` ships only `dist`.
 The published package stays framework-agnostic; nothing from the stories
