@@ -37,7 +37,7 @@ what you are doing, whatever tool you are**:
 | Skill | Read it when |
 | --- | --- |
 | [`theme`](skills/theme/SKILL.md) | Writing or reviewing UI code anywhere in the repository — which colour, spacing, radius, type or shadow token to reach for. |
-| [`code-layout`](.claude/skills/code-layout/SKILL.md) | Placing, naming, splitting or moving a file anywhere in the repository — a helper, a shared type, a story. |
+| [`code-layout`](.claude/skills/code-layout/SKILL.md) | Placing, naming, splitting or moving a file anywhere in the repository — a helper, a shared type, a context, a story. |
 | [`add-component`](packages/react/.claude/skills/add-component/SKILL.md) | Adding a component to `@trailpack-ui/react` — the order of steps that avoids rework. |
 | [`testing`](packages/react/.claude/skills/testing/SKILL.md) | Writing or changing a test in `@trailpack-ui/react` — once one has been asked for, which is the only time it happens. |
 
@@ -150,7 +150,7 @@ the component they export: `Button.tsx`, `Button.css.ts`, `Button.stories.tsx`.
 Everything else is `useDisclosure.ts`, `renderGuidance.ts`, `cx.ts`, whether or
 not it has a single primary export. No kebab-case, no snake_case. No `.utils`
 or `.types` in the name either — the folder already says that, see
-[below](#where-utilities-and-types-go).
+[below](#where-utilities-types-and-contexts-go).
 
 Directories follow the same rule: `generateTokens/`, and a component's folder
 takes its PascalCase name, `components/Button/`. The one exception is a skill
@@ -162,14 +162,22 @@ Keep the casing of a name stable once chosen. macOS and Windows do not
 distinguish `Foo.ts` from `foo.ts`, so a case-only rename travels badly through
 Git and has to go via a temporary name.
 
-## Where utilities and types go
+## Where utilities, types and contexts go
 
-**A helper goes in a `utils/` folder and a shared type in a `types/` folder,
-never loose beside the modules that use them.** The folder sits at whatever
+**A helper goes in a `utils/` folder, a shared type in a `types/` folder and a
+React context in a `contexts/` folder, never loose beside the modules that use
+them** — as components go in a `components/` folder. The folder sits at whatever
 level the thing is scoped to: `src/utils/cx.ts` is the package's, and a helper
 only one component needs gets a `utils/` inside that component's own folder.
-The folder is what classifies the file, so the name stays plain camelCase —
-`cx.ts`, not `cx.utils.ts`.
+The folder is what classifies the file, so the name stays plain and says only
+the subject — `cx.ts`, not `cx.utils.ts`; `contexts/theme.tsx`, not
+`themeContext.tsx`.
+
+**A context keeps its provider and its hook in one file.** They close over a
+`createContext` value that stays module-private, so splitting them gives each
+file its own instance and the hook then reads the default forever — with
+nothing failing anywhere. That the provider is a component is not a reason to
+move it to `components/`.
 
 **A file groups what its contents are *about*, never what shape they have.** A
 `string.ts` or a `class.ts` is named after the type of an argument or a return
@@ -191,8 +199,13 @@ Placing, naming, splitting or moving one of these is what the
 
 **A story lives next to what it documents, not in a directory that exists only
 to hold stories** — the component's own folder in a package that ships
-components, `.storybook` for a story documenting no component in particular. A
-`storybook/` folder beside a component holds prose that does not fit in the
-stories, and only when there is some. The
-[`code-layout` skill](.claude/skills/code-layout/SKILL.md) has the trees and the
-one fallback.
+components, `.storybook` for a story documenting no component in particular.
+
+**Where Storybook material does need a folder of its own, that folder is
+`storybook/`, never `stories/`.** Beside a component it holds the prose that
+does not fit in the stories — and only when there is some. A package shipping
+no components keeps its whole reference in `src/storybook/`. The name is what
+lets the stories lie flat in it: the folder says what it is for, so the
+components, contexts and helpers a story is built from go in its own
+`components/`, `contexts/` and `utils/` rather than beside the stories. The
+[`code-layout` skill](.claude/skills/code-layout/SKILL.md) has the trees.

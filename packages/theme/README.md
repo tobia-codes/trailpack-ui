@@ -195,7 +195,7 @@ generated file would make it differ from what the generator produces and fail
 that test on the next run. The skill needs no such entry: every one of its
 outputs lands outside this package, where no formatter runs.
 
-`guidance.ts` is not part of the runtime API, and neither is `src/stories`.
+`guidance.ts` is not part of the runtime API, and neither is `src/storybook`.
 Living under `src` does not put them in the package: `tsconfig.build.json` builds
 from `src/index.ts` alone, so anything the entry point does not import is not in
 the program, and `files` ships only `dist`.
@@ -208,7 +208,7 @@ reads it with Vite's `?raw` and hands it to the `Markdown` block from
 Relative links are rewritten to the repository there, since they would otherwise
 resolve against Storybook's own URL.
 
-It lives with the Storybook configuration rather than under `src/stories`
+It lives with the Storybook configuration rather than under `src/storybook`
 because it documents the package rather than any one story — the same split
 `packages/react` makes.
 

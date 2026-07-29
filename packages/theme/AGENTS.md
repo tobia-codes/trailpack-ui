@@ -24,7 +24,7 @@ Several things about it are easy to break:
   nothing in the build output may be content-hashed.
 - **What gets published is whatever `src/index.ts` reaches.**
   `tsconfig.build.json` narrows `include` to that one entry, so the module graph
-  decides the declaration output — `src/stories`, `scripts` and `guidance.ts`
+  decides the declaration output — `src/storybook`, `scripts` and `guidance.ts`
   are never in the program and need no exclusion, whether they sit under `src`
   or not. Adding a new export path to `package.json` is therefore the one case
   that also needs a new entry in `files` there.
@@ -59,10 +59,12 @@ with it.
 ## Stories
 
 This package ships no components, so its stories document the package itself
-and live in `src/stories` — the fallback the [root
+and live in `src/storybook` — the fallback the [root
 rule](../../AGENTS.md#where-stories-go) describes, not an exception to it. The
-overview page that renders `README.md` sits in `.storybook`, as it does in every
-package.
+components, contexts and helpers the reference is built from sit in that
+folder's own `components/`, `contexts/` and `utils/`, so what lies flat beside
+`tokens.stories.tsx` is stories and nothing else. The overview page that renders
+`README.md` sits in `.storybook`, as it does in every package.
 
 The stories style themselves with inline `vars` rather than `.css.ts` files, on
 purpose: it keeps the reference honest about the package's central claim, that

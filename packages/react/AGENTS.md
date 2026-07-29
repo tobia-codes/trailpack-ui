@@ -52,7 +52,7 @@ barrel and a `./hooks` export path.
 Component, styles and story share one folder under `src/components` — see
 [Where stories go](../../AGENTS.md#where-stories-go) for the rule and its one
 exception. This package has components, so it applies here in full: there is no
-`src/stories` directory. The theme decorator and the package overview live in
+`src/storybook` directory. The theme decorator and the package overview live in
 `.storybook`, with the configuration they belong to.
 
 A component that needs smaller components of its own keeps them in a
@@ -62,9 +62,10 @@ A component that needs smaller components of its own keeps them in a
 **Nesting is what marks them private.** They exist for the one component above
 them; a subcomponent that turns out to be useful elsewhere moves up to
 `src/components` rather than being imported sideways out of another component's
-folder. Helpers and types follow the same shape — see
-[Where utilities and types go](../../AGENTS.md#where-utilities-and-types-go) for
-the level to put them at.
+folder. Helpers, types and contexts follow the same shape — see [Where
+utilities, types and contexts
+go](../../AGENTS.md#where-utilities-types-and-contexts-go) for the level to put
+them at.
 
 **Nothing nested is exported from `src/components/index.ts`.** That barrel is
 the `./components` subpath in `package.json`, so anything reachable through it

@@ -2,18 +2,19 @@
 name: code-layout
 description: >-
   Use when deciding where a file goes in this repository — a helper, a shared
-  type, a story — or when a file has outgrown its name and should be split or
-  renamed. Covers the reasoning behind the placement rules in AGENTS.md: how to
-  tell a real module from a drawer, when to widen a file's subject, and when a
-  helper moves up a level.
+  type, a context, a story — or when a file has outgrown its name and should be
+  split or renamed. Covers the reasoning behind the placement rules in
+  AGENTS.md: how to tell a real module from a drawer, when to widen a file's
+  subject, and when a helper moves up a level.
 ---
 
 # Where a file goes
 
-The rules are in [AGENTS.md](../../../AGENTS.md#where-utilities-and-types-go)
-and are always loaded. This page is the reasoning behind them — read it when you
-are placing, naming, splitting or moving a file and the rule alone does not
-settle it.
+The rules are in
+[AGENTS.md](../../../AGENTS.md#where-utilities-types-and-contexts-go) and are
+always loaded. This page is the reasoning behind them — read it when you are
+placing, naming, splitting or moving a file and the rule alone does not settle
+it.
 
 ## Telling a module from a drawer
 
@@ -79,6 +80,17 @@ directly above `Button` in `Button.tsx` and does not move to a `types/` folder
 for being exported alongside it. Promoting one on first use costs a file and an
 import and buys nothing.
 
+## Contexts
+
+One file per context, holding the `createContext` value, the provider and the
+hook that reads it. Why the provider and the hook cannot separate is the rule
+in AGENTS.md; the value stays unexported for a second reason — a consumer that
+can reach it calls `use()` on it directly and bypasses whatever the hook does.
+
+`providers/` is the name to reject: a provider is one export of the module
+rather than what the module is, and a folder named after it makes the hook
+beside it look misfiled — which is how the split above gets made.
+
 ## Stories
 
 A story lives next to what it documents. In a package that ships components that
@@ -98,8 +110,27 @@ and don'ts, migration notes. No such page, no empty folder.
 
 A story documenting no component in particular goes to `.storybook`, with the
 configuration; the overview page that renders `README.md` is the case both
-packages have. `packages/theme` keeps a `src/stories` directory because it ships
-no components at all — that is the rule's fallback, not an exception to it.
+packages have. A package that ships no components at all keeps its whole
+reference under `src/storybook/`, the rule's fallback rather than an exception
+to it — `packages/theme` is the one:
 
-Story helpers — a tone list, a layout object — stay inside the story that uses
-them until a second story needs the same thing.
+```
+src/storybook/
+  tokens.stories.tsx      flat, because it is a story
+  components/             what the stories render with
+    Swatch.tsx
+  contexts/               provider and hook in one file
+    theme.tsx
+  utils/                  what those components share
+    stack.ts
+```
+
+**The folder is `storybook/` in both cases, never `stories/`.** A folder named
+for one of the file kinds inside it invites everything else to lie flat beside
+the stories; named for what it is for, it takes the same `components/`,
+`contexts/` and `utils/` split as anywhere else, and what stays flat in it is
+stories.
+
+That split starts when there is something to split. A helper one story uses —
+a tone list, a layout object — stays inside that story until a second story
+needs it.

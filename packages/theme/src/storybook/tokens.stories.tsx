@@ -1,8 +1,18 @@
+/**
+ * The reference is styled with inline `vars` throughout, which is deliberate:
+ * the page is also a working demonstration that the tokens need no bundler
+ * plugin and no vanilla-extract in the consumer.
+ */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { guidance } from '../guidance';
 import { vars } from '../themes.css';
 import type { ToneName } from '../tokens';
-import { Grid, Label, Page, Section, Swatch, useTokens } from './parts';
+import { Grid } from './components/Grid';
+import { Label } from './components/Label';
+import { Page } from './components/Page';
+import { Section } from './components/Section';
+import { Swatch } from './components/Swatch';
+import { useTokens } from './contexts/theme';
 
 const meta: Meta = {
   title: 'Foundations/Tokens',

@@ -2,7 +2,7 @@
  * When to reach for which token — the prose half of the token contract.
  *
  * This is the single source for both renderings of that guidance: the
- * Storybook reference under `stories/`, and the generated agent skill at
+ * Storybook reference under `storybook/`, and the generated agent skill at
  * `skills/theme/SKILL.md`. Written twice, it would be wrong once.
  *
  * Prose uses `backticks` for code; each renderer turns them into whatever it
