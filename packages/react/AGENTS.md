@@ -71,6 +71,20 @@ one nobody decided to ship. The same holds for `src/utils/index.ts` behind
 `./utils`: a component-local `utils/` folder is private, the package-level one
 is public surface.
 
+**What two components share but nobody decided to ship goes in `src/internal/`,
+not `src/utils`.** The kind still picks the folder beneath it —
+`src/internal/utils/`, `src/internal/types/` — so `internal/` sorts by
+visibility and does not become a drawer of its own. It gets
+no barrel, no `exports` entry and no line in `vite.config.ts` or
+`tsconfig.build.json`. Whatever a component imports still lands in `dist/`, and
+that is fine: the `exports` map has no wildcard, so no consumer can name the
+path. Moving a helper into `src/utils` is the decision to ship it, and it is
+made once, when the file is placed — not later, by adding a line to a barrel.
+
+**`src/internal/` and `src/tests/` do not merge.** Any module may import from
+`internal/`; only a test file may import from `tests/`, because a component
+reaching into it publishes the helper. One folder over both would hide that.
+
 ## Styling
 
 **Which token to reach for is answered by the

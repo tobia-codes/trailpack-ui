@@ -66,17 +66,28 @@ parked at the top because it might be useful — is what turns `src/utils` into 
 drawer.
 
 In `packages/react` the levels are the component's own folder and the package
-root:
+root, and at the root the same level forks by visibility:
 
 ```
 src/components/Input/
   utils/                only what Input alone needs
-src/utils/              a second component needs it too — and this is
-                        the ./utils subpath, so it is published API
+src/internal/utils/     a second component needs it too
+src/utils/              …and it is worth shipping — this is the ./utils
+                        subpath, so it is published API
 ```
 
-Promoting a helper into `src/utils` is therefore a decision to ship it. A test
-helper never goes there at all; `src/tests/` is its home, and
+The second consumer forces the move up. It does not decide the fork: `internal/`
+is where a shared helper lands unless shipping it was the point, so
+`src/utils` stays a list of things somebody chose to publish rather than
+everything that happened to be needed twice.
+
+Read the fork as a question about the helper's audience, not its size or its
+quality. `cx` is one line and is published anyway, because a consumer adding to
+a `className` needs the same helper the components use. What nobody outside the
+package would ever call is internal however good it is.
+
+A test helper is in neither: `src/tests/` is its home, it is off limits to
+everything but a test file, and
 [packages/react/AGENTS.md](../../../packages/react/AGENTS.md#tests) has why.
 
 ## Types
