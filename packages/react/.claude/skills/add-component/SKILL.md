@@ -107,15 +107,9 @@ the story next to it is never in the program.
 pnpm build && pnpm test && pnpm lint && pnpm format
 ```
 
-The suite covers `Button` and `cx`; nothing in it checks step 1.
-`src/boundaries.test.ts` used to catch a wrong answer there — it asserted that a
-module declares `'use client'` exactly when it touches React's runtime, and that
-the directive survives into `dist/`. It was
-removed with the hooks it covered. **If your component carries a directive, it
-is the first one in the package again: bring that test back with it**, plus a
-`turbo.json` here adding `build` to the `test` task's `dependsOn`, since it
-reads `dist/`. Until then, check by hand that `dist/<Name>/<Name>.js` starts
-with the directive and that no barrel does.
+The suite covers `Button` and `cx`; nothing in it checks step 1, so check that
+one by hand: if your component carries a directive, `dist/<Name>/<Name>.js`
+starts with it, and no barrel does.
 
 Then `pnpm dev` and look at the story in both themes via the toolbar. Nothing
 verifies that a story renders; a broken one fails in the browser, not in CI.

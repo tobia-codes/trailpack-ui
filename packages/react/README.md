@@ -165,13 +165,9 @@ pnpm format
 its `dist`, exactly as a consuming app would. From the root, `pnpm build`
 handles that ordering through Turborepo.
 
-Nothing in the suite enforces the `'use client'` rule above. `src/boundaries.test.ts`
-did, asserting it in both directions and checking that the directives survived
-into `dist/`; it went when the two hooks that were its only client modules did.
-A misplaced directive is caught by review today, not by CI. Worth restoring the
-test along with the first module that carries one, and note that it read
-`dist/`, so it needed a `turbo.json` in this package adding `build` to the
-`test` task's `dependsOn`.
+Nothing in the suite enforces the `'use client'` rule above. A directive that is
+missing where it is needed, present where it is not, or lost on the way into
+`dist/` is caught by review today, not by CI.
 
 ### Why the build emits one file per module
 

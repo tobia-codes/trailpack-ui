@@ -23,7 +23,7 @@ short form:
 
 - A module gets `'use client'` **if and only if** it calls into React's runtime
   itself — `useState`, `useEffect`, `useId`, `useRef`, `useSyncExternalStore`,
-  `useContext`.
+  `use`, `createContext`.
 - A purely presentational component does **not** get one, even if it takes an
   `onClick`. It works on both sides that way; the caller passing the handler is
   the boundary.
@@ -32,14 +32,11 @@ short form:
   there makes everything imported through it a client boundary for every
   consumer.
 
-**Nothing enforces this automatically.** `src/boundaries.test.ts` used to, in
-both directions and through into `dist/`; it was removed along with the two
-hooks that were its only client modules. Today the package contains no
-`'use client'` at all and is server-safe end to end, so the rule is upheld by
-reading it — and a stray `useState` would grow every consumer's bundle with no
-error anywhere. **The first module that needs the directive should bring the
-test back**, along with a `turbo.json` here adding `build` to the `test` task's
-`dependsOn`, because it reads `dist/`.
+**Nothing enforces this automatically.** The package has exactly one client
+module, `src/utils/createStrictContext.ts`; everything else is server-safe, and
+the rule is upheld by reading it. A stray `useState` would grow every
+consumer's bundle with no error anywhere, and a directive that does not survive
+the build into `dist/` fails just as quietly.
 
 Adding state to an existing server-safe component is a real decision, not a
 detail: it moves that component and everything rendered with it into the client
