@@ -209,3 +209,10 @@ lets the stories lie flat in it: the folder says what it is for, so the
 components, contexts and helpers a story is built from go in its own
 `components/`, `contexts/` and `utils/` rather than beside the stories. The
 [`code-layout` skill](.claude/skills/code-layout/SKILL.md) has the trees.
+
+**A decorator goes in `.storybook/decorators/`, never inline in
+`preview.tsx`.** It applies to every story in the package, so it belongs with
+the configuration and nowhere under `src`; and `preview.tsx` stays the manifest
+that names the decorators, globals and parameters rather than defining them.
+Whatever only that decorator needs — a stylesheet, a webfont — is imported in
+its file, not in the manifest.

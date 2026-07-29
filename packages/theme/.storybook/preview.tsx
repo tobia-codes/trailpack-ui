@@ -1,5 +1,5 @@
 import type { Preview } from '@storybook/react-vite';
-import { withTheme } from './withTheme';
+import { withTheme } from './decorators/withTheme';
 
 const preview: Preview = {
   decorators: [withTheme],

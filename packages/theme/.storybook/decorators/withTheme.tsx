@@ -1,6 +1,6 @@
 import type { Decorator } from '@storybook/react-vite';
-import { darkTheme, vars } from '../src/themes.css';
-import { ThemeProvider } from '../src/storybook/contexts/theme';
+import { darkTheme, vars } from '../../src/themes.css';
+import { ThemeProvider } from '../../src/storybook/contexts/theme';
 
 /**
  * Importing the theme module is what pulls the stylesheet in: the
