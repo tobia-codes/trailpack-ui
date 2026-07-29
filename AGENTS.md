@@ -37,6 +37,7 @@ what you are doing, whatever tool you are**:
 | Skill | Read it when |
 | --- | --- |
 | [`theme`](skills/theme/SKILL.md) | Writing or reviewing UI code anywhere in the repository — which colour, spacing, radius, type or shadow token to reach for. |
+| [`code-layout`](.claude/skills/code-layout/SKILL.md) | Placing, naming, splitting or moving a file anywhere in the repository — a helper, a shared type, a story. |
 | [`add-component`](packages/react/.claude/skills/add-component/SKILL.md) | Adding a component to `@trailpack-ui/react` — the order of steps that avoids rework. |
 | [`testing`](packages/react/.claude/skills/testing/SKILL.md) | Writing or changing a test in `@trailpack-ui/react` — once one has been asked for, which is the only time it happens. |
 
@@ -44,32 +45,24 @@ They carry procedure and reference, never rules: anything you must not get wrong
 is in an `AGENTS.md`, which is always loaded. A skill that starts restating one
 has drifted.
 
-### Where a skill lives, and why the two places differ
+### Where a skill lives
 
-A skill that only makes sense **with this repository checked out** sits under
-`<package>/.claude/skills/<name>/`, scoped to the package it applies to.
-`add-component` is one: it is about editing `packages/react`, and would mean
-nothing in someone else's project.
+A skill useful to a **consumer of the published packages** goes in
+[`skills/`](skills/README.md) at the root, a tool-neutral catalogue — that file
+carries the reasoning and the shape. A skill for a **contributor with the
+repository checked out** goes under `.claude/skills/`, scoped to what it applies
+to: the package's own when it is about one package, the root's when it is
+repo-wide, because a skill under a package only reaches files beneath it.
 
-A skill that is useful to a **consumer of the published packages** goes in
-[`skills/`](skills/README.md) at the root — a tool-neutral catalogue, plain
-markdown, no assistant in particular. `theme` is one: which token to reach for
-is the same question in a consumer's app as it is here.
-
-`theme` is needed by both audiences, so `.claude/skills/theme/SKILL.md` at the
-root **points at the catalogue instead of repeating it**. Both files are written
-by `pnpm generate:skill` in `packages/theme` from `src/guidance.ts`, and a test
-fails if either goes stale. **Never edit a generated `SKILL.md` or
+`theme` is needed by both audiences, so `.claude/skills/theme/SKILL.md` is a
+pointer at the catalogue rather than a copy. Both it and the catalogue entry are
+written by `pnpm generate:skill` in `packages/theme` from `src/guidance.ts`, and
+a test fails if either goes stale. **Never edit a generated `SKILL.md` or
 `metadata.json` by hand** — see
 [packages/theme/AGENTS.md](packages/theme/AGENTS.md).
 
-The pointer is at the root rather than under `packages/theme` on purpose: a
-skill under a package only applies to files beneath it, and this one is needed
-in `packages/react` just as much.
-
-A skill scoped to one package starts under that package. Promote it to the root
-catalogue only when a consumer would need it, and add it to both tables when you
-do — nothing generates either.
+Start one at the narrowest scope that fits and move it up when a second consumer
+appears. Either way, add it to the table above — nothing generates it.
 
 ## Environment
 
@@ -79,13 +72,8 @@ do — nothing generates either.
 ## Critical: npm cannot run from the repository root
 
 `devEngines.packageManager = pnpm` in the root `package.json` makes **every**
-`npm` command fail there with `EBADDEVENGINES`, read-only ones included. `cd`
-into a package first.
-
-```sh
-npm view vite version                       # from the root  → exit 1, EBADDEVENGINES
-cd packages/theme && npm view vite version  #                → exit 0
-```
+`npm` command fail there with `EBADDEVENGINES`, read-only ones like `npm view`
+included. `cd` into a package first.
 
 ## Git
 
@@ -118,19 +106,17 @@ bump level is a release decision. See [Releasing](README.md#releasing).
 ## Tests are asked for, never written alongside the code
 
 **Never add a test file unless the change explicitly asks for one.** A component
-gets written, restyled and reshaped several times before its behaviour is
-settled. A test written along the way pins down a shape nobody has committed to
-yet, so it either gets rewritten with every pass or quietly freezes an early
-decision — and both cost more than the test was worth.
+is written, restyled and reshaped several times before its behaviour settles; a
+test written along the way pins down a shape nobody has committed to yet, so it
+is either rewritten with every pass or quietly freezes an early decision.
 
 "Write a test for X", "cover this", "the suite should catch Y" is the signal.
-Until it comes, leave the suite alone: touching a component is not a reason to
-test it, and neither is noticing that it has none. Say that a change is untested
-if it matters; do not fix it unprompted.
+Until it comes, leave the suite alone — touching a component is not a reason to
+test it, and neither is noticing that it has none. Say a change is untested if
+it matters; do not fix it unprompted.
 
 This is about *adding* coverage. A change that breaks an existing test still has
-to deal with that test, and `pnpm test` still has to pass before any change is
-done.
+to deal with it, and `pnpm test` still has to pass before any change is done.
 
 ## Functions
 
@@ -145,27 +131,17 @@ no such reason is an arrow.
 
 ## Comments
 
-**Write a comment only when the code cannot carry the point itself.** Comments
-are not free: they take up reading space, they go stale silently, and a file
-padded with them takes longer to understand than the same file without.
+**Write a comment only when the code cannot carry the point itself.** The bar is
+*why*, not *what*: it earns its place by recording something the reader cannot
+recover from the code — a constraint from outside the file, an alternative tried
+and rejected, a consequence that shows up elsewhere. Restating the code,
+captioning a block (`// imports`), repeating a descriptive name and documenting
+what a change *is* are all noise; the last belongs in the commit message.
 
-The bar is *why*, not *what*. A comment earns its place when it records
-something the reader cannot recover from the code — a constraint from outside
-the file, an alternative that was tried and rejected, a consequence that shows
-up somewhere else. Restating the code, captioning a block (`// imports`),
-repeating a descriptive name, or documenting what a change *is* are all noise;
-the last belongs in the commit message.
-
-Keep length in proportion: a paragraph above four lines of configuration means
-the reasoning belongs in the README, and inline it can almost always be two
-lines instead of ten. Do not narrate absence — explaining why something is *not*
-in the file is worth it only when a reader is likely to add it back and break
-something.
-
-If a change makes an existing comment wrong, fix it or delete it. A stale
-comment is worse than none, because it is trusted. None of this restricts doc
-comments on exported API; a `/** */` on an exported symbol is part of the
-package's surface, and those stay.
+Keep it in proportion — two lines, not ten — and do not narrate absence unless a
+reader would otherwise add the thing back and break something. If a change makes
+a comment wrong, fix it or delete it: a stale comment is trusted, so it is worse
+than none. Doc comments on exported API are outside all of this and stay.
 
 ## File names
 
@@ -195,66 +171,28 @@ only one component needs gets a `utils/` inside that component's own folder.
 The folder is what classifies the file, so the name stays plain camelCase —
 `cx.ts`, not `cx.utils.ts`.
 
-**A file groups what its contents are *about*, never what shape they have.**
-`date.ts` is a real module: its exports share a subject, they change together
-when the library underneath them does, and they get imported together. A
-`string.ts` or a `class.ts` holding everything that returns a className is not
-— those are named after the type of an argument or of a return value, which
-excludes nothing, so `capitalize`, `slugify` and `parseQueryString` end up side
-by side while belonging to three unrelated features.
-
-The usable test is whether you can say what does **not** belong in the file. If
-the only answer is "anything not shaped like X", it is a drawer and will fill up
-like one. The same question splits a file later: once its exports stop being
-imported together, it is holding two subjects. Neither extreme is the safe
-default — fifteen single-function files with nothing to do with one another are
-that same drawer spread thinner. `cx.ts` is alone because there is no
-class-helper subject for it to join yet, not because one export per file is a
-rule.
+**A file groups what its contents are *about*, never what shape they have.** A
+`string.ts` or a `class.ts` is named after the type of an argument or a return
+value, which excludes nothing, and fills up like the drawer it is.
 
 **A file with one member is named after that member, and renamed when a second
-one arrives** — `cx.ts` becomes `className.ts` the day something else has to
-build a class attribute, not before. Naming it for the subject up front invents
-a category to fill; waiting costs a `git mv` and one import line, because a file
-name inside `utils/` reaches consumers only through the barrel and is not part
-of the published surface. The same restraint applies to the subject itself: it
-has to be an actual job, so that `slugify` is recognisably outside it. Widen it
-to "anything that returns a class name" and it is a drawer again under a better
-name.
-
-Scope narrowly and move up later. Something starts in the folder closest to its
-only consumer; it moves to the package-level `utils/` when a second consumer
-appears, not in anticipation of one. The reverse — a helper parked at the top
-because it might be useful — is what turns `src/utils` into a drawer.
+one arrives.** Start it at the level closest to its only consumer and move it up
+when a second appears, never in anticipation of one.
 
 **A type stays in the module that uses it until a second module needs it.** A
 component's props type is the case that comes up most: `ButtonProps` is declared
-directly above `Button` in `Button.tsx` and does not move to a `types/` folder
-for being exported alongside it. `types/` is for types that are genuinely
-shared; promoting one on first use costs a file and an import and buys nothing.
+directly above `Button` in `Button.tsx` and does not move to `types/` for being
+exported alongside it.
+
+Placing, naming, splitting or moving one of these is what the
+[`code-layout` skill](.claude/skills/code-layout/SKILL.md) is for.
 
 ## Where stories go
 
 **A story lives next to what it documents, not in a directory that exists only
-to hold stories.** In a package that ships components, that is the component's
-own folder:
-
-```
-src/components/Button/
-  Button.tsx
-  Button.css.ts
-  Button.stories.tsx
-  storybook/            only when the component needs custom documentation
-    Button.mdx
-```
-
-`storybook/` is the one exception, for prose that does not fit in the stories —
-usage rules, dos and don'ts, migration notes. No such page, no empty folder.
-
-A story documenting no component in particular goes to `.storybook`, with the
-configuration; the overview page that renders `README.md` is the case both
-packages have. `packages/theme` keeps a `src/stories` directory because it ships
-no components at all — that is the rule's fallback, not an exception to it.
-
-Story helpers stay inside the story that uses them until a second story needs
-the same thing.
+to hold stories** — the component's own folder in a package that ships
+components, `.storybook` for a story documenting no component in particular. A
+`storybook/` folder beside a component holds prose that does not fit in the
+stories, and only when there is some. The
+[`code-layout` skill](.claude/skills/code-layout/SKILL.md) has the trees and the
+one fallback.

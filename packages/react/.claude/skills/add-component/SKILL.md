@@ -16,17 +16,11 @@ before starting rather than working from this page alone.
 
 ## 1. Decide the boundary first
 
-It shapes the rest, and changing it later means rewriting the component.
+**Do this before writing anything else** — it shapes the rest, and changing it
+later means rewriting the component. The rule itself is in
+[AGENTS.md](../../../AGENTS.md#the-use-client-boundary-is-the-central-invariant).
 
-Ask only this: **does the module itself call React's runtime** — `useState`,
-`useEffect`, `useId`, `useRef`, `useSyncExternalStore`, `useContext`?
-
-- **No** → no directive. The component works on the server and in the client,
-  and a Server Component renders it with zero JavaScript. Taking an `onClick` as
-  a prop does _not_ count; the caller passing the handler is the boundary.
-- **Yes** → `'use client';` as the first line of the `.tsx`.
-
-Prefer the first. If a component needs state, consider whether the state can
+Prefer no directive. If a component needs state, consider whether the state can
 live in a hook the consumer calls, leaving the component itself universal.
 There is no `src/hooks` at the moment, so that means creating it: a barrel
 beside the hook, a `./hooks` entry in `exports`, `build.lib.entry` and
@@ -44,16 +38,31 @@ src/components/<Name>/
 No `index.ts` per component folder — `src/components/index.ts` imports the file
 directly.
 
+A component with smaller components of its own nests them, each in the same
+shape. Nesting is what marks them private:
+
+```
+src/components/Input/
+  Input.tsx
+  Input.css.ts
+  Input.stories.tsx
+  components/
+    Label/
+      Label.tsx
+      Label.css.ts
+  utils/                only what Input alone needs
+```
+
 ## 3. Write `<Name>.css.ts`
 
-Read every value from `vars`; never write a hex, a px radius or a font stack
-here. If a token is missing, it is added in `packages/theme` first, with its
-guidance entry and both generators — not worked around here.
+[AGENTS.md](../../../AGENTS.md#styling) has the rules: `vars` only and never a
+literal, tone variants through `styleVariants`, every interactive state
+qualified with `:not(:disabled)`. Which token to reach for is the
+[`theme` skill](../../../../../skills/theme/SKILL.md).
 
-- Tone variants: `styleVariants(vars.tone, (tone) => ({ … }))`, so a tone added
-  to the theme cannot arrive half-supported.
+What those do not cover:
+
 - Scale variants (padding, gap): `styleVariants(vars.space, …)`.
-- Qualify every interactive state with `:not(:disabled)`.
 - Focus is `vars.focusRing.width` / `.offset` with `vars.color.ring`, on
   `:focus-visible`.
 - Any `transition` needs a `(prefers-reduced-motion: reduce)` escape.
@@ -98,10 +107,10 @@ the story next to it is never in the program.
 pnpm build && pnpm test && pnpm lint && pnpm format
 ```
 
-The package has no test suites at present, so `pnpm test` passes vacuously and
-step 1 goes unchecked. `src/boundaries.test.ts` used to catch a wrong answer
-there — it asserted that a module declares `'use client'` exactly when it
-touches React's runtime, and that the directive survives into `dist/`. It was
+The suite covers `Button` and `cx`; nothing in it checks step 1.
+`src/boundaries.test.ts` used to catch a wrong answer there — it asserted that a
+module declares `'use client'` exactly when it touches React's runtime, and that
+the directive survives into `dist/`. It was
 removed with the hooks it covered. **If your component carries a directive, it
 is the first one in the package again: bring that test back with it**, plus a
 `turbo.json` here adding `build` to the `test` task's `dependsOn`, since it

@@ -52,25 +52,12 @@ barrel and a `./hooks` export path.
 Component, styles and story share one folder under `src/components` — see
 [Where stories go](../../AGENTS.md#where-stories-go) for the rule and its one
 exception. This package has components, so it applies here in full: there is no
-`src/stories` directory.
-
-The theme decorator and the package overview live in `.storybook`, with the
-configuration they belong to.
+`src/stories` directory. The theme decorator and the package overview live in
+`.storybook`, with the configuration they belong to.
 
 A component that needs smaller components of its own keeps them in a
-`components/` folder beneath it, each in the same folder-per-component shape:
-
-```
-src/components/Input/
-  Input.tsx
-  Input.css.ts
-  Input.stories.tsx
-  components/
-    Label/
-      Label.tsx
-      Label.css.ts
-  utils/                only what Input alone needs
-```
+`components/` folder beneath it, each in the same folder-per-component shape;
+[`add-component`](.claude/skills/add-component/SKILL.md) has the tree.
 
 **Nesting is what marks them private.** They exist for the one component above
 them; a subcomponent that turns out to be useful elsewhere moves up to
@@ -139,26 +126,25 @@ The [`testing` skill](.claude/skills/testing/SKILL.md) has the shape a test
 takes; this section carries only what breaks silently.
 
 The harness is Vitest with `happy-dom`, Testing Library and `vitest-axe`,
-configured in the `test` block of `vite.config.ts`. `test` keeps
-`--passWithNoTests` so the Turborepo task stays green if the suite ever empties
-out.
+configured in the `test` block of `vite.config.ts`, which keeps
+`--passWithNoTests` so the Turborepo task stays green if the suite empties out.
 
 - **Test infrastructure lives in `src/tests/`, and nothing outside a test file
   may import from it. Nothing enforces that.** A component importing
   `@tests/utils/checkA11y` builds cleanly and emits `dist/tests/…`, which then
-  ships: `files: ["dist"]` filters by path, not by meaning, so anything that
-  reaches `dist` is published. Test files themselves are safe wherever they sit
-  — nothing imports them, so the build never reaches them. It is the helpers
-  that leak. Holding this folder outside `src` would have turned that mistake
-  into a `TS6059` build failure through `rootDir`; it sits inside by choice, so
-  the rule is upheld by reading.
+  ships: `files: ["dist"]` filters by path, not by meaning. Test files
+  themselves are safe wherever they sit — nothing imports them, so the build
+  never reaches them; it is the helpers that leak. The folder sits inside `src`
+  by choice — outside it, `rootDir` would have turned that mistake into a
+  `TS6059` build failure instead of a silent one.
 - **A test helper may never go in `src/utils`.** That folder is the `./utils`
   subpath export, so anything in it is published API by design rather than by
   accident.
 - Tests reach the folder through the `@tests` alias, declared in `test.alias` in
   `vite.config.ts` **and** in `tsconfig.json`'s `paths`. Both, or the editor and
   the runner disagree about the same import.
-- **`tests/setup.ts` calls `afterEach(cleanup)` and that call is load-bearing.**
+- **`src/tests/setup.ts` calls `afterEach(cleanup)` and that call is
+  load-bearing.**
   Testing Library only registers its own cleanup when it can see a global
   `afterEach`, and this package runs without `globals`. Drop it and every render
   in a file stays mounted — scoped queries carry on working, so what surfaces is
@@ -170,7 +156,7 @@ out.
   `axe.configure` or rule-disabling to quiet a violation. A violation is a bug
   in the component's markup.
 
-A test that reads `dist/` — the removed boundary test did — needs a `turbo.json`
-in this package adding `build` to the `test` task's `dependsOn`. The root config
-only waits for _dependencies'_ builds, not this package's own. If a test starts
-failing on a missing `dist/` file, that wiring is what is missing.
+A test that reads `dist/` needs a `turbo.json` in this package adding `build` to
+the `test` task's `dependsOn`; the root config only waits for _dependencies'_
+builds, not this package's own. A test failing on a missing `dist/` file is
+missing that wiring.

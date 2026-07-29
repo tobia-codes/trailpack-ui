@@ -38,8 +38,8 @@ export default defineConfig({
   build: {
     sourcemap: true,
     lib: {
-      // One per `exports` entry in package.json; tsconfig.build.json lists the
-      // same four, or the subpath ships without declarations.
+      // One per code `exports` entry in package.json; tsconfig.build.json lists
+      // the same three, or the subpath ships without declarations.
       entry: {
         index: 'src/index.ts',
         'components/index': 'src/components/index.ts',

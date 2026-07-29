@@ -157,7 +157,7 @@ pnpm dev              # Storybook on :6007
 pnpm build            # dist/ — one file per module, styles.css and declarations
 pnpm build:storybook  # storybook-static/
 pnpm lint
-pnpm test             # vitest — no suites at present, see below
+pnpm test             # vitest
 pnpm format
 ```
 
@@ -165,14 +165,13 @@ pnpm format
 its `dist`, exactly as a consuming app would. From the root, `pnpm build`
 handles that ordering through Turborepo.
 
-The package has no test suites right now. It had one, `src/boundaries.test.ts`,
-which asserted the `'use client'` rule above in both directions and checked
-that the directives survived into `dist/`; it went when the two hooks that were
-its only client modules did. Nothing enforces the rule automatically today — a
-misplaced directive is caught by review, not by CI. Worth restoring the test
-along with the first module that carries one, and note that it read `dist/`, so
-it needed a `turbo.json` in this package adding `build` to the `test` task's
-`dependsOn`.
+Nothing in the suite enforces the `'use client'` rule above. `src/boundaries.test.ts`
+did, asserting it in both directions and checking that the directives survived
+into `dist/`; it went when the two hooks that were its only client modules did.
+A misplaced directive is caught by review today, not by CI. Worth restoring the
+test along with the first module that carries one, and note that it read
+`dist/`, so it needed a `turbo.json` in this package adding `build` to the
+`test` task's `dependsOn`.
 
 ### Why the build emits one file per module
 

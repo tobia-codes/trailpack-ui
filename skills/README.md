@@ -43,10 +43,11 @@ rules for editing the skill itself. See the root
 
 ## What is not here
 
-Skills about working **on** this repository — adding a component, wiring a
-package — stay under `<package>/.claude/skills/`, scoped to the package they
-apply to. They are addressed to a contributor with the monorepo checked out, and
-mean nothing in a consumer's project. The root
+Skills about working **on** this repository — adding a component, placing a
+file, wiring a package — stay under `.claude/skills/`, scoped to what they apply
+to: the package's own when they are about one package, the root's when they are
+repo-wide. They are addressed to a contributor with the monorepo checked out,
+and mean nothing in a consumer's project. The root
 [AGENTS.md](../AGENTS.md#skills) lists both sets.
 
 A skill can be needed by both audiences, and `theme` is: agents working in this
