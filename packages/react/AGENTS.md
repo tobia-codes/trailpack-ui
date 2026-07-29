@@ -143,17 +143,21 @@ configured in the `test` block of `vite.config.ts`. `test` keeps
 `--passWithNoTests` so the Turborepo task stays green if the suite ever empties
 out.
 
-- **Test infrastructure lives in `tests/`, at the package root and not under
-  `src`.** `tsconfig.build.json` sets `rootDir: "src"`, and that is what makes
-  the two placements fail differently the day something in `src` imports a test
-  helper by mistake. From `tests/`, TypeScript refuses to build:
-  `TS6059: … is not under 'rootDir'`. From a `src/tests/`, it emits
-  `dist/tests/…d.ts`, exits 0 and publishes test code to consumers with nothing
-  reported anywhere. The helper additionally may not go in `src/utils`, which is
-  the `./utils` subpath export and published API in its own right.
-- Tests reach that folder through the `@tests` alias, declared in `test.alias`
-  in `vite.config.ts` **and** in `tsconfig.json`'s `paths`. Both, or the editor
-  and the runner disagree about the same import.
+- **Test infrastructure lives in `src/tests/`, and nothing outside a test file
+  may import from it. Nothing enforces that.** A component importing
+  `@tests/utils/checkA11y` builds cleanly and emits `dist/tests/…`, which then
+  ships: `files: ["dist"]` filters by path, not by meaning, so anything that
+  reaches `dist` is published. Test files themselves are safe wherever they sit
+  — nothing imports them, so the build never reaches them. It is the helpers
+  that leak. Holding this folder outside `src` would have turned that mistake
+  into a `TS6059` build failure through `rootDir`; it sits inside by choice, so
+  the rule is upheld by reading.
+- **A test helper may never go in `src/utils`.** That folder is the `./utils`
+  subpath export, so anything in it is published API by design rather than by
+  accident.
+- Tests reach the folder through the `@tests` alias, declared in `test.alias` in
+  `vite.config.ts` **and** in `tsconfig.json`'s `paths`. Both, or the editor and
+  the runner disagree about the same import.
 - **`tests/setup.ts` calls `afterEach(cleanup)` and that call is load-bearing.**
   Testing Library only registers its own cleanup when it can see a global
   `afterEach`, and this package runs without `globals`. Drop it and every render

@@ -30,9 +30,9 @@ export default defineConfig({
     // The vanilla-extract plugin above is what lets a test import a component
     // that pulls in a `.css.ts`; without it the import fails outright.
     environment: 'happy-dom',
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ['./src/tests/setup.ts'],
     alias: {
-      '@tests': fileURLToPath(new URL('./tests', import.meta.url)),
+      '@tests': fileURLToPath(new URL('./src/tests', import.meta.url)),
     },
   },
   build: {

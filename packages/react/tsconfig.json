@@ -13,8 +13,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@tests/*": ["./tests/*"]
+      "@tests/*": ["./src/tests/*"]
     }
   },
-  "include": ["src", "tests", ".storybook/**/*", "vite.config.ts"]
+  "include": ["src", ".storybook/**/*", "vite.config.ts"]
 }

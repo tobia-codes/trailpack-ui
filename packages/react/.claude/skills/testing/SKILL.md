@@ -16,8 +16,9 @@ should be on this page at all:
 
 - **A test is written when one is asked for**, never as a companion to a
   component. If the request was "add a Card" or "restyle the Button", stop here.
-- **Test infrastructure goes in `tests/`, never `src/utils`** — that folder is a
-  published export path.
+- **Test infrastructure goes in `src/tests/`, never `src/utils`** — that folder
+  is a published export path. Nothing outside a test file may import from
+  `src/tests/` either; it would ship.
 
 `src/components/Button/Button.test.tsx` is the worked example. Read it first.
 
@@ -66,7 +67,7 @@ describe('Button', () => {
   with no props — one line, and the file stays the same shape as every other.
 - `describe`, `it`, `expect` and `vi` are imported from `vitest`. This package
   runs without `globals`, so nothing is ambient.
-- `@testing-library/jest-dom` matchers need no import; `tests/setup.ts` has
+- `@testing-library/jest-dom` matchers need no import; `src/tests/setup.ts` has
   them.
 - Query the way a user finds things — `getByRole` first, then `getByLabelText`
   and `getByText`. `container.querySelector` and class names describe the
