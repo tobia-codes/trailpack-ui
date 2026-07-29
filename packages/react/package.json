@@ -45,17 +45,22 @@
     "build:storybook": "storybook build",
     "lint": "oxlint",
     "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
     "format": "oxfmt .",
     "format:check": "oxfmt --check ."
   },
   "devDependencies": {
     "@storybook/addon-docs": "^10.5.4",
     "@storybook/react-vite": "^10.5.5",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
     "@trailpack-ui/theme": "workspace:^",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vanilla-extract/css": "^1.21.2",
     "@vanilla-extract/vite-plugin": "^5.2.6",
+    "happy-dom": "^20.11.1",
     "oxfmt": "^0.60.0",
     "oxlint": "^1.75.0",
     "react": "^19.2.8",
@@ -63,7 +68,8 @@
     "storybook": "^10.5.5",
     "typescript": "^7.0.2",
     "vite": "^8.1.5",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "vitest-axe": "1.0.0-pre.5"
   },
   "peerDependencies": {
     "@trailpack-ui/theme": "^0.1.0",

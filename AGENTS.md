@@ -38,6 +38,7 @@ what you are doing, whatever tool you are**:
 | --- | --- |
 | [`theme`](skills/theme/SKILL.md) | Writing or reviewing UI code anywhere in the repository — which colour, spacing, radius, type or shadow token to reach for. |
 | [`add-component`](packages/react/.claude/skills/add-component/SKILL.md) | Adding a component to `@trailpack-ui/react` — the order of steps that avoids rework. |
+| [`testing`](packages/react/.claude/skills/testing/SKILL.md) | Writing or changing a test in `@trailpack-ui/react` — once one has been asked for, which is the only time it happens. |
 
 They carry procedure and reference, never rules: anything you must not get wrong
 is in an `AGENTS.md`, which is always loaded. A skill that starts restating one
@@ -114,6 +115,23 @@ bump level is a release decision. See [Releasing](README.md#releasing).
   package's `package.json`.** Each one causes a failure only much later, at
   publish time.
 
+## Tests are asked for, never written alongside the code
+
+**Never add a test file unless the change explicitly asks for one.** A component
+gets written, restyled and reshaped several times before its behaviour is
+settled. A test written along the way pins down a shape nobody has committed to
+yet, so it either gets rewritten with every pass or quietly freezes an early
+decision — and both cost more than the test was worth.
+
+"Write a test for X", "cover this", "the suite should catch Y" is the signal.
+Until it comes, leave the suite alone: touching a component is not a reason to
+test it, and neither is noticing that it has none. Say that a change is untested
+if it matters; do not fix it unprompted.
+
+This is about *adding* coverage. A change that breaks an existing test still has
+to deal with that test, and `pnpm test` still has to pass before any change is
+done.
+
 ## Functions
 
 **Write arrow functions.** `const render = (x: string) => …` is the default form
@@ -154,7 +172,9 @@ package's surface, and those stay.
 **camelCase, with components the one exception** — they are PascalCase, after
 the component they export: `Button.tsx`, `Button.css.ts`, `Button.stories.tsx`.
 Everything else is `useDisclosure.ts`, `renderGuidance.ts`, `cx.ts`, whether or
-not it has a single primary export. No kebab-case, no snake_case.
+not it has a single primary export. No kebab-case, no snake_case. No `.utils`
+or `.types` in the name either — the folder already says that, see
+[below](#where-utilities-and-types-go).
 
 Directories follow the same rule: `generateTokens/`, and a component's folder
 takes its PascalCase name, `components/Button/`. The one exception is a skill
@@ -165,6 +185,53 @@ has to match the skill's `name:` field and that format is kebab-case —
 Keep the casing of a name stable once chosen. macOS and Windows do not
 distinguish `Foo.ts` from `foo.ts`, so a case-only rename travels badly through
 Git and has to go via a temporary name.
+
+## Where utilities and types go
+
+**A helper goes in a `utils/` folder and a shared type in a `types/` folder,
+never loose beside the modules that use them.** The folder sits at whatever
+level the thing is scoped to: `src/utils/cx.ts` is the package's, and a helper
+only one component needs gets a `utils/` inside that component's own folder.
+The folder is what classifies the file, so the name stays plain camelCase —
+`cx.ts`, not `cx.utils.ts`.
+
+**A file groups what its contents are *about*, never what shape they have.**
+`date.ts` is a real module: its exports share a subject, they change together
+when the library underneath them does, and they get imported together. A
+`string.ts` or a `class.ts` holding everything that returns a className is not
+— those are named after the type of an argument or of a return value, which
+excludes nothing, so `capitalize`, `slugify` and `parseQueryString` end up side
+by side while belonging to three unrelated features.
+
+The usable test is whether you can say what does **not** belong in the file. If
+the only answer is "anything not shaped like X", it is a drawer and will fill up
+like one. The same question splits a file later: once its exports stop being
+imported together, it is holding two subjects. Neither extreme is the safe
+default — fifteen single-function files with nothing to do with one another are
+that same drawer spread thinner. `cx.ts` is alone because there is no
+class-helper subject for it to join yet, not because one export per file is a
+rule.
+
+**A file with one member is named after that member, and renamed when a second
+one arrives** — `cx.ts` becomes `className.ts` the day something else has to
+build a class attribute, not before. Naming it for the subject up front invents
+a category to fill; waiting costs a `git mv` and one import line, because a file
+name inside `utils/` reaches consumers only through the barrel and is not part
+of the published surface. The same restraint applies to the subject itself: it
+has to be an actual job, so that `slugify` is recognisably outside it. Widen it
+to "anything that returns a class name" and it is a drawer again under a better
+name.
+
+Scope narrowly and move up later. Something starts in the folder closest to its
+only consumer; it moves to the package-level `utils/` when a second consumer
+appears, not in anticipation of one. The reverse — a helper parked at the top
+because it might be useful — is what turns `src/utils` into a drawer.
+
+**A type stays in the module that uses it until a second module needs it.** A
+component's props type is the case that comes up most: `ButtonProps` is declared
+directly above `Button` in `Button.tsx` and does not move to a `types/` folder
+for being exported alongside it. `types/` is for types that are genuinely
+shared; promoting one on first use costs a file and an import and buys nothing.
 
 ## Where stories go
 

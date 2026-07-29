@@ -11,7 +11,10 @@
     "skipLibCheck": true,
     "declaration": false,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@tests/*": ["./tests/*"]
+    }
   },
-  "include": ["src", ".storybook/**/*", "vite.config.ts"]
+  "include": ["src", "tests", ".storybook/**/*", "vite.config.ts"]
 }

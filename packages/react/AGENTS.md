@@ -57,6 +57,35 @@ exception. This package has components, so it applies here in full: there is no
 The theme decorator and the package overview live in `.storybook`, with the
 configuration they belong to.
 
+A component that needs smaller components of its own keeps them in a
+`components/` folder beneath it, each in the same folder-per-component shape:
+
+```
+src/components/Input/
+  Input.tsx
+  Input.css.ts
+  Input.stories.tsx
+  components/
+    Label/
+      Label.tsx
+      Label.css.ts
+  utils/                only what Input alone needs
+```
+
+**Nesting is what marks them private.** They exist for the one component above
+them; a subcomponent that turns out to be useful elsewhere moves up to
+`src/components` rather than being imported sideways out of another component's
+folder. Helpers and types follow the same shape — see
+[Where utilities and types go](../../AGENTS.md#where-utilities-and-types-go) for
+the level to put them at.
+
+**Nothing nested is exported from `src/components/index.ts`.** That barrel is
+the `./components` subpath in `package.json`, so anything reachable through it
+is published API a consumer may depend on — and a subcomponent exported there is
+one nobody decided to ship. The same holds for `src/utils/index.ts` behind
+`./utils`: a component-local `utils/` folder is private, the package-level one
+is public surface.
+
 ## Styling
 
 **Which token to reach for is answered by the
@@ -104,9 +133,38 @@ decisions are actually made.
 
 ## Tests
 
-There are none at present, and `test` carries `--passWithNoTests` so the script
-and the Turborepo task stay green. Vitest is still installed, so a suite is one
-file away.
+**A test is written when one is asked for** — see [Tests are asked for, never
+written alongside the code](../../AGENTS.md#tests-are-asked-for-never-written-alongside-the-code).
+The [`testing` skill](.claude/skills/testing/SKILL.md) has the shape a test
+takes; this section carries only what breaks silently.
+
+The harness is Vitest with `happy-dom`, Testing Library and `vitest-axe`,
+configured in the `test` block of `vite.config.ts`. `test` keeps
+`--passWithNoTests` so the Turborepo task stays green if the suite ever empties
+out.
+
+- **Test infrastructure lives in `tests/`, at the package root and not under
+  `src`.** `tsconfig.build.json` sets `rootDir: "src"`, and that is what makes
+  the two placements fail differently the day something in `src` imports a test
+  helper by mistake. From `tests/`, TypeScript refuses to build:
+  `TS6059: … is not under 'rootDir'`. From a `src/tests/`, it emits
+  `dist/tests/…d.ts`, exits 0 and publishes test code to consumers with nothing
+  reported anywhere. The helper additionally may not go in `src/utils`, which is
+  the `./utils` subpath export and published API in its own right.
+- Tests reach that folder through the `@tests` alias, declared in `test.alias`
+  in `vite.config.ts` **and** in `tsconfig.json`'s `paths`. Both, or the editor
+  and the runner disagree about the same import.
+- **`tests/setup.ts` calls `afterEach(cleanup)` and that call is load-bearing.**
+  Testing Library only registers its own cleanup when it can see a global
+  `afterEach`, and this package runs without `globals`. Drop it and every render
+  in a file stays mounted — scoped queries carry on working, so what surfaces is
+  axe failing on a previous test's markup.
+- **The `vanillaExtractPlugin` in `vite.config.ts` is what lets a test import a
+  component at all.** Vitest reads that config, so anything reaching a `.css.ts`
+  fails outright without it.
+- **Never edit a `version` field to satisfy a test**, and do not reach for
+  `axe.configure` or rule-disabling to quiet a violation. A violation is a bug
+  in the component's markup.
 
 A test that reads `dist/` — the removed boundary test did — needs a `turbo.json`
 in this package adding `build` to the `test` task's `dependsOn`. The root config

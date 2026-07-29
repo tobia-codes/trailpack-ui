@@ -1,5 +1,7 @@
+import { fileURLToPath } from 'node:url';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
-import { defineConfig, type Plugin } from 'vite';
+import type { Plugin } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 /**
  * `styles.css` is a plain stylesheet, so TypeScript has no type for it and
@@ -24,6 +26,15 @@ export {};
 
 export default defineConfig({
   plugins: [vanillaExtractPlugin(), stylesheetTypeStub()],
+  test: {
+    // The vanilla-extract plugin above is what lets a test import a component
+    // that pulls in a `.css.ts`; without it the import fails outright.
+    environment: 'happy-dom',
+    setupFiles: ['./tests/setup.ts'],
+    alias: {
+      '@tests': fileURLToPath(new URL('./tests', import.meta.url)),
+    },
+  },
   build: {
     sourcemap: true,
     lib: {
