@@ -170,7 +170,7 @@ Three things render them, and none of them owns them:
 The first two are the same guidance in a different frame — the skill opens with
 rules addressed to whoever is writing the code, `generated/TOKENS.md` with where
 it sits among the others. They render through the same functions in
-`scripts/lib/renderGuidance.ts`, so they cannot differ in shape either.
+`scripts/utils/renderGuidance.ts`, so they cannot differ in shape either.
 `pnpm generate` writes both.
 
 The skill is written once, to [`skills/theme/`](../../skills/README.md) at the

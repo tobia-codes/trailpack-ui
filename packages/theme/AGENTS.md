@@ -30,7 +30,7 @@ Several things about it are easy to break:
   that also needs a new entry in `files` there.
 - **Token usage guidance is written once, in `src/guidance.ts`.** The Storybook
   tables, `generated/TOKENS.md` and the agent skill are all renderings of it,
-  the last two through the shared functions in `scripts/lib/renderGuidance.ts`.
+  the last two through the shared functions in `scripts/utils/renderGuidance.ts`.
   Never edit a generated file by hand.
 - **`generate:skill` writes only outside this package.** It produces
   `skills/theme/SKILL.md` and `skills/theme/metadata.json` at the _repository

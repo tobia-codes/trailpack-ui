@@ -51,12 +51,19 @@ The same restraint applies to the subject itself: it has to be an actual job, so
 that `slugify` is recognisably outside it. Widen it to "anything that returns a
 class name" and it is a drawer again under a better name.
 
+A context is the one file named for its subject from the start, and it is not
+an inconsistency: `theme.tsx` holds a provider and a hook that arrived together
+and cannot be separated, so there is no single member for the name to follow
+and no second one to wait for.
+
 ## Which level to start at
 
-Scope narrowly and move up later. Something starts in the folder closest to its
-only consumer; it moves to the package-level `utils/` when a second consumer
-appears, not in anticipation of one. The reverse — a helper parked at the top
-because it might be useful — is what turns `src/utils` into a drawer.
+What is deferred is the level, never the folder. A helper that has earned a file
+is in a `utils/` from the first day — the question is only whose: the folder
+closest to its only consumer, moving up to the package-level `utils/` when a
+second consumer appears and not in anticipation of one. The reverse — a helper
+parked at the top because it might be useful — is what turns `src/utils` into a
+drawer.
 
 In `packages/react` the levels are the component's own folder and the package
 root:
@@ -74,11 +81,9 @@ helper never goes there at all; `src/tests/` is its home, and
 
 ## Types
 
-A type stays in the module that uses it until a second module needs it. A
-component's props type is the case that comes up most: `ButtonProps` is declared
-directly above `Button` in `Button.tsx` and does not move to a `types/` folder
-for being exported alongside it. Promoting one on first use costs a file and an
-import and buys nothing.
+The rule that a type waits for its second module is in AGENTS.md; what it saves
+is a file and an import that buy nothing, since a props type exported alongside
+its component is already reachable everywhere the component is.
 
 ## Contexts
 
@@ -131,6 +136,5 @@ the stories; named for what it is for, it takes the same `components/`,
 `contexts/` and `utils/` split as anywhere else, and what stays flat in it is
 stories.
 
-That split starts when there is something to split. A helper one story uses —
-a tone list, a layout object — stays inside that story until a second story
-needs it.
+That split starts when there is something to split — a tone list or a layout
+object one story uses is still inside that story.

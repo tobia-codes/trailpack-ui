@@ -184,13 +184,17 @@ move it to `components/`.
 value, which excludes nothing, and fills up like the drawer it is.
 
 **A file with one member is named after that member, and renamed when a second
-one arrives.** Start it at the level closest to its only consumer and move it up
-when a second appears, never in anticipation of one.
+one arrives.** A context is the exception: it is named for its subject whatever
+it exports, because the provider and the hook it holds are one unit and neither
+of them names it — `contexts/theme.tsx`.
 
-**A type stays in the module that uses it until a second module needs it.** A
-component's props type is the case that comes up most: `ButtonProps` is declared
-directly above `Button` in `Button.tsx` and does not move to `types/` for being
-exported alongside it.
+**Nothing earns a file of its own until a second module needs it, and then that
+file goes straight into the folder for its kind.** Until then a helper or a type
+stays declared in the module using it: `ButtonProps` sits directly above
+`Button` in `Button.tsx` and does not move to `types/` for being exported
+alongside it. The folder is immediate, the level is not — a helper two
+components share moves up to the package's `utils/`, but only once the second
+one exists.
 
 Placing, naming, splitting or moving one of these is what the
 [`code-layout` skill](.claude/skills/code-layout/SKILL.md) is for.

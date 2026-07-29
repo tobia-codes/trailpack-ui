@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs';
 import type { GuidanceChapter } from '../../src/guidance.ts';
 import { guidance } from '../../src/guidance.ts';
-import { renderChapters } from '../lib/renderGuidance.ts';
+import { renderChapters } from '../utils/renderGuidance.ts';
 
 /** The guidance itself, in the tool-neutral catalogue at the repository root. */
 export const skillPath = new URL('../../../../skills/theme/SKILL.md', import.meta.url);

@@ -7,7 +7,7 @@
  * where the reference fits among the others.
  */
 import { guidance } from '../../src/guidance.ts';
-import { renderChapters } from '../lib/renderGuidance.ts';
+import { renderChapters } from '../utils/renderGuidance.ts';
 
 export const tokensPath = new URL('../../generated/TOKENS.md', import.meta.url);
 
