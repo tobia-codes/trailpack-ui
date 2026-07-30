@@ -30,9 +30,9 @@ const frontmatter = `---
 name: theme
 description: >-
   Use when writing or reviewing UI code against @trailpack-ui/theme — picking
-  colours, spacing, radii, type, shadows, icon sizes, focus rings or stacking
-  order. Says which token to reach for and why, so components stay correct in
-  both the light and the dark theme.
+  colours, spacing, radii, type, shadows, icon sizes, focus rings, breakpoints
+  or stacking order. Says which token to reach for and why, so components stay
+  correct in both the light and the dark theme, at every viewport width.
 ---`;
 
 const preamble = `# Trailpack design tokens
@@ -71,7 +71,12 @@ Dark mode is a class: put \`darkTheme\` (exported from the same package) on
 5. **Never type a \`var(--…)\` by hand.** The variable names are build-time
    hashes; only the paths on \`vars\` are stable. If a file cannot import
    \`vars\`, it cannot use these tokens — that is a signal to move the styling,
-   not to copy a hash.`;
+   not to copy a hash.
+6. **Write layout mobile first.** The styles outside any media query are the
+   small-screen ones, and a breakpoint only ever adds to them. Conditions come
+   from \`media\` — imported from the same package, but not through \`vars\`,
+   because a media query cannot read a CSS variable — and never as a
+   hand-written \`(min-width: …)\`.`;
 
 export const renderSkill = () => {
   // `overview` is the Storybook landing page. Here the preamble above already
@@ -142,7 +147,7 @@ export const renderMetadata = () => {
       packageVersion: compatibleRange(pkg.version),
       organization: 'Trailpack',
       abstract:
-        'Picks the right Trailpack design token by the role an element plays — tone, colour, space, radius, icon size, focus ring, type, shadow or stacking order — and states the pairings that are contrast-checked in both themes.',
+        'Picks the right Trailpack design token by the role an element plays — tone, colour, space, radius, icon size, focus ring, type, shadow, breakpoint or stacking order — and states the pairings that are contrast-checked in both themes.',
       // `homepage` points at the package directory, which GitHub serves with
       // `tree`. A file under it needs `blob`.
       references: [pkg.homepage, `${pkg.homepage.replace('/tree/', '/blob/')}/generated/TOKENS.md`],

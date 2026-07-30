@@ -231,6 +231,55 @@ export const guidance = {
     },
   },
 
+  breakpoints: {
+    title: 'Breakpoints',
+    sections: {
+      mobileFirst: {
+        title: 'Mobile first',
+        lead: [
+          'Four widths the layout may change at, and one direction to write them in. The styles outside any query are the small-screen ones — a phone matches no query at all — and each breakpoint adds to what is already there. Nothing is undone further up, which is the point: a rule that has to be reversed at a wider viewport is a rule that will be reversed in the wrong order eventually.',
+          'That is why there is no `xs` step and no `max-width` form. `media` gives `min-width` conditions only, and the smallest layout has no name because it is the default.',
+        ],
+        rows: [
+          {
+            token: 'media.sm',
+            when: 'Large phones and up (40rem / 640px). Two columns where there was one, a pair that was stacked sitting side by side.',
+          },
+          {
+            token: 'media.md',
+            when: 'Tablets and up (48rem / 768px). The first width where a sidebar, a real table or a multi-column form fits.',
+          },
+          {
+            token: 'media.lg',
+            when: 'Laptops and up (64rem / 1024px). Persistent navigation, three columns, a detail pane beside a list.',
+          },
+          {
+            token: 'media.xl',
+            when: 'Wide desktops (80rem / 1280px). Usually a roomier page shell rather than more UI — reach for it last.',
+          },
+          {
+            token: 'breakpoints.*',
+            when: 'The bare width, where a query is not what you need: a `max-width` on a page container, or a width compared in JavaScript.',
+          },
+        ],
+        notes: [
+          'The widths are in `rem`, and in a media query `rem` is the browser’s default font size, not the page’s. A reader who has raised it keeps the narrower layout for longer — the layout changes in proportion to the text it has to hold.',
+          'Content decides where a breakpoint goes; the device does not. If a card grid wants its third column at 52rem, take `md` and let it come early, or add a step — matching one phone is how a set of breakpoints turns into a list of devices.',
+        ],
+      },
+      writingTheQuery: {
+        title: 'Writing the query',
+        lead: [
+          'Breakpoints are the one part of this set that is not on `vars`, because a media query cannot read a CSS variable: `@media (min-width: var(--x))` never matches. `media` and `breakpoints` are plain strings imported from the package root, inlined into the query when the stylesheet is built.',
+          'In a `.css.ts` file the condition is the key — `media.md` as a computed key inside `@media`, with the wider styles under it. The same string is what `window.matchMedia` takes, for the rare case that a layout decision cannot be made in CSS.',
+        ],
+        notes: [
+          'Never type a raw `(min-width: 768px)`. It is the same mistake as a hex value but with a longer fuse: the layout keeps working, and then one component starts changing at a width no other component knows about.',
+        ],
+      },
+    },
+  },
+
   radius: {
     title: 'Radius',
     sections: {

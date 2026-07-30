@@ -111,7 +111,9 @@ document.documentElement.style.setProperty('--app-surface', vars.color.surface);
 
 Nine scales — `color`, `tone`, `space`, `radius`, `iconSize`, `focusRing`,
 `font`, `shadow`, `zIndex` — meant to be complete enough to style a whole
-application with, without reaching for a hex value.
+application with, without reaching for a hex value. `breakpoints` is a tenth,
+exported beside `vars` rather than on it — see
+[Breakpoints](#breakpoints).
 
 **[TOKENS.md](generated/TOKENS.md)** is the reference: every token, with the rule
 for when to reach for it. `pnpm dev` shows the same thing with the values
@@ -149,6 +151,45 @@ The paths on `vars` are the public API; the variable names behind them are not,
 and can change between releases. Overriding tokens to build a custom theme is
 not supported yet — `createTheme` requires the whole contract, and there is no
 helper for producing one.
+
+### Breakpoints
+
+Four widths, and they are **not on `vars`**: a media query cannot read a CSS
+variable — `@media (min-width: var(--x))` never matches — so a breakpoint has to
+be inlined into the query at build time. `media` gives the condition, and
+`breakpoints` the bare width for a `max-width` or a comparison in JavaScript.
+
+```ts
+// Card.css.ts
+import { media, vars } from '@trailpack-ui/theme';
+
+export const cards = style({
+  display: 'grid',
+  gap: vars.space[4],
+  gridTemplateColumns: '1fr',
+  '@media': {
+    [media.md]: { gridTemplateColumns: 'repeat(2, 1fr)' },
+    [media.lg]: { gridTemplateColumns: 'repeat(3, 1fr)' },
+  },
+});
+```
+
+The set is **mobile first**, and only in that direction: `media` holds
+`min-width` conditions, so the styles outside the query are the small-screen
+ones and a breakpoint only ever adds to them. There is no `xs` step, because the
+smallest layout is the default.
+
+| Name | Width            | Where it lands      |
+| ---- | ---------------- | ------------------- |
+| `sm` | `40rem` / 640px  | Large phones and up |
+| `md` | `48rem` / 768px  | Tablets and up      |
+| `lg` | `64rem` / 1024px | Laptops and up      |
+| `xl` | `80rem` / 1280px | Wide desktops       |
+
+The widths are in `rem` on purpose: inside a media query `rem` resolves against
+the browser's default font size rather than the page's, so a reader who has
+raised it keeps the narrower layout for longer. `BreakpointName` types a prop or
+a lookup over the four.
 
 ## Development
 

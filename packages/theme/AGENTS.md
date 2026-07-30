@@ -23,6 +23,10 @@ Several things about it are easy to break:
   `ToneName` is derived from it and `lightTokens` is checked against it, which
   is the opposite of the direction you would expect — so a tone is added there
   first, and nothing anywhere writes the names out a second time.
+- **Breakpoints are tokens that stay out of the contract.**
+  `src/tokens/breakpoints.ts` exports plain strings because a media query cannot
+  read a CSS variable. Folding them into `shared`, the file next to it, compiles
+  and ships, and produces queries that never match.
 - **`dist/theme.css` is an export path in `package.json`, so its filename is
   public API.** It is pinned via `build.lib.cssFileName` in `vite.config.ts`;
   nothing in the build output may be content-hashed.

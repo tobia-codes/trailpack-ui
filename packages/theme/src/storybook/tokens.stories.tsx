@@ -6,7 +6,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { guidance } from '../guidance';
 import { vars } from '../themes.css';
-import { toneNames, type ToneName } from '../tokens';
+import { breakpoints, media, toneNames, type ToneName } from '../tokens';
 import { Grid } from './components/Grid';
 import { Label } from './components/Label';
 import { Page } from './components/Page';
@@ -49,6 +49,7 @@ const toneSteps = [
 ] as const;
 
 const spaceKeys = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24] as const;
+const breakpointKeys = ['sm', 'md', 'lg', 'xl'] as const;
 const radiusKeys = ['xs', 'sm', 'md', 'lg', 'xl', 'full'] as const;
 const fontSizeKeys = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const;
 const weightKeys = ['regular', 'medium', 'semibold', 'bold'] as const;
@@ -262,6 +263,102 @@ export const Spacing: Story = {
       </Page>
     );
   },
+};
+
+export const Breakpoints: Story = {
+  render: () => {
+    const { title, sections } = guidance.breakpoints;
+
+    return (
+      <Page title={title}>
+        <Section section={sections.mobileFirst}>
+          <style>{breakpointCss}</style>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: vars.space[4] }}>
+            <div style={{ display: 'flex', gap: vars.space[2], flexWrap: 'wrap' }}>
+              {breakpointKeys.map((key) => (
+                <div key={key} className="tp-breakpoint-chip" data-breakpoint={key}>
+                  <span>media.{key}</span>
+                  <span>{breakpoints[key]}</span>
+                </div>
+              ))}
+            </div>
+            <p
+              style={{
+                margin: 0,
+                color: vars.color.mutedForeground,
+                fontSize: vars.font.size.sm,
+              }}
+            >
+              Resize the canvas: a chip fills in once its own query matches, and the pair below
+              stops being stacked at <code style={{ fontFamily: vars.font.family.mono }}>md</code>.
+            </p>
+            <div className="tp-breakpoint-pair">
+              <StackedPanel label="Stacked below md" />
+              <StackedPanel label="Side by side from md" />
+            </div>
+          </div>
+        </Section>
+
+        <Section section={sections.writingTheQuery} />
+      </Page>
+    );
+  },
+};
+
+// The chips light up from the same `media` strings a component would use, so
+// what the reference shows is the tokens working rather than a picture of them.
+const breakpointCss = `
+.tp-breakpoint-chip {
+  display: flex;
+  flex-direction: column;
+  gap: ${vars.space[1]};
+  background: ${vars.color.muted};
+  color: ${vars.color.mutedForeground};
+  border: 1px solid ${vars.color.border};
+  border-radius: ${vars.radius.sm};
+  padding: ${vars.space[2]} ${vars.space[3]};
+  font-family: ${vars.font.family.mono};
+  font-size: ${vars.font.size.xs};
+}
+.tp-breakpoint-pair {
+  display: flex;
+  flex-direction: column;
+  gap: ${vars.space[3]};
+}
+${breakpointKeys
+  .map(
+    (key) => `@media ${media[key]} {
+  .tp-breakpoint-chip[data-breakpoint="${key}"] {
+    background: ${vars.tone.accent.subtle};
+    color: ${vars.tone.accent.onSubtle};
+    border-color: ${vars.tone.accent.border};
+  }
+}`,
+  )
+  .join('\n')}
+@media ${media.md} {
+  .tp-breakpoint-pair {
+    flex-direction: row;
+  }
+}
+`;
+
+const StackedPanel = ({ label }: { label: string }) => {
+  return (
+    <div
+      style={{
+        flex: 1,
+        background: vars.color.surface,
+        border: `1px solid ${vars.color.border}`,
+        borderRadius: vars.radius.md,
+        boxShadow: vars.shadow.xs,
+        padding: vars.space[5],
+        fontSize: vars.font.size.sm,
+      }}
+    >
+      {label}
+    </div>
+  );
 };
 
 export const Radius: Story = {
