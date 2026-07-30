@@ -113,7 +113,15 @@ application.`;
  * bump is the breaking one, so that is where the range has to close.
  */
 const compatibleRange = (version: string) => {
-  const [major, minor] = version.split('.').map(Number);
+  const segments = version.split('.');
+  const major = Number(segments[0]);
+  const minor = Number(segments[1]);
+
+  // The range is written into a file that ships in the catalogue, so a version
+  // this cannot read has to stop the generator rather than render `<NaN.0.0`.
+  if (!Number.isInteger(major) || !Number.isInteger(minor)) {
+    throw new Error(`Cannot derive a compatible range from version "${version}".`);
+  }
 
   return major === 0 ? `>=${version} <0.${minor + 1}.0` : `>=${version} <${major + 1}.0.0`;
 };
