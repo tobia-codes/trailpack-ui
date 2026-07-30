@@ -6,7 +6,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { guidance } from '../guidance';
 import { vars } from '../themes.css';
-import type { ToneName } from '../tokens';
+import { toneNames, type ToneName } from '../tokens';
 import { Grid } from './components/Grid';
 import { Label } from './components/Label';
 import { Page } from './components/Page';
@@ -35,8 +35,6 @@ const colorKeys = [
   'ring',
   'overlay',
 ] as const;
-
-const toneNames = ['accent', 'neutral', 'danger', 'success', 'warning', 'info'] as const;
 
 const toneSteps = [
   'solid',

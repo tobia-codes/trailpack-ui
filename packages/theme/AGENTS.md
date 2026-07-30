@@ -19,6 +19,10 @@ Several things about it are easy to break:
   every colour pairing the token set promises against WCAG AA, in both themes.
   Changing a hex value without running `pnpm test` is how a contrast regression
   gets in.
+- **The tone list in `src/tokens/tone.ts` is the source, not a copy of one.**
+  `ToneName` is derived from it and `lightTokens` is checked against it, which
+  is the opposite of the direction you would expect — so a tone is added there
+  first, and nothing anywhere writes the names out a second time.
 - **`dist/theme.css` is an export path in `package.json`, so its filename is
   public API.** It is pinned via `build.lib.cssFileName` in `vite.config.ts`;
   nothing in the build output may be content-hashed.

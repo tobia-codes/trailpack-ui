@@ -77,6 +77,13 @@ with nothing installed:
 <div style={{ background: vars.tone.info.subtle, color: vars.tone.info.onSubtle }} />
 ```
 
+`ToneName` types a tone prop, and `toneNames` is the same set at runtime, for a
+`<select>`, a swatch table or a Storybook control:
+
+```tsx
+import { toneNames, type ToneName } from '@trailpack-ui/theme';
+```
+
 ### Where the tokens reach, and where they do not
 
 Both the variable names and the `darkTheme` class name are vanilla-extract

@@ -1,18 +1,11 @@
 import { shared } from './shared';
+import type { ToneName, ToneScale } from './tone';
 
 /**
  * Light theme, and the shape the contract and `darkTokens` are typed from.
  *
- * Every tone has the same nine steps, so a component can index `vars.tone[x]`
- * and a tone added later cannot arrive half-defined:
- *
- * - `solid` / `onSolid` — filled button or badge, and the text on it
- * - `subtle` / `onSubtle` — soft alert or badge fill, and the text on it
- * - `text` — the tone as text on a page surface. `warning.solid` is ~2:1 on
- *   white, which is why this step exists separately.
- * - `border` — outline of a subtle fill, or a tinted divider
- *
- * The contrast pairings are asserted in `../themes.test.ts`.
+ * The tones are checked against [`tone.ts`](tone.ts), which owns the list of
+ * them and the steps each one defines.
  */
 export const lightTokens = {
   ...shared,
@@ -108,7 +101,7 @@ export const lightTokens = {
       text: '#1d4ed8',
       border: '#93c5fd',
     },
-  },
+  } satisfies Record<ToneName, ToneScale>,
 
   shadow: {
     xs: '0 1px 2px rgba(0, 0, 0, 0.05)',
@@ -120,4 +113,3 @@ export const lightTokens = {
 };
 
 export type ThemeTokens = typeof lightTokens;
-export type ToneName = keyof ThemeTokens['tone'];

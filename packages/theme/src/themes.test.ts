@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { darkTokens, lightTokens, type ThemeTokens, type ToneName } from './tokens';
+import { darkTokens, lightTokens, type ThemeTokens, toneNames } from './tokens';
 
 /**
  * WCAG 2.1 relative luminance and contrast ratio. Inlined here rather than
@@ -18,8 +18,6 @@ const contrast = (a: string, b: string): number => {
   const [la, lb] = [luminance(a), luminance(b)];
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 };
-
-const TONES: ToneName[] = ['accent', 'neutral', 'danger', 'success', 'warning', 'info'];
 
 /** WCAG 2.1 AA for body text. */
 const AA = 4.5;
@@ -66,7 +64,7 @@ const pairs = (tokens: ThemeTokens): Pair[] => {
     },
   ];
 
-  for (const name of TONES) {
+  for (const name of toneNames) {
     const t = tone[name];
     list.push(
       { label: `${name}: onSolid on solid`, fg: t.onSolid, bg: t.solid, min: AA },
@@ -98,9 +96,9 @@ describe.each(Object.entries(themes))('%s theme', (_name, tokens) => {
   });
 
   it('defines all nine steps of all six tones', () => {
-    expect(Object.keys(tokens.tone).toSorted()).toEqual(TONES.toSorted());
+    expect(Object.keys(tokens.tone).toSorted()).toEqual(toneNames.toSorted());
 
-    for (const name of TONES) {
+    for (const name of toneNames) {
       const invalid = Object.entries(tokens.tone[name])
         .filter(([, value]) => !/^#[0-9a-f]{6}$/i.test(value))
         .map(([step, value]) => `${name}.${step} = ${value}`);
@@ -111,7 +109,7 @@ describe.each(Object.entries(themes))('%s theme', (_name, tokens) => {
   });
 
   it('keeps solid, hover and active distinct', () => {
-    for (const name of TONES) {
+    for (const name of toneNames) {
       const { solid, solidHover, solidActive } = tokens.tone[name];
       expect(new Set([solid, solidHover, solidActive]).size).toBe(3);
     }
