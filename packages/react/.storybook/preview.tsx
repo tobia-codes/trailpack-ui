@@ -4,6 +4,8 @@ import { withTheme } from './decorators/withTheme';
 const preview: Preview = {
   decorators: [withTheme],
 
+  tags: ['autodocs'],
+
   initialGlobals: { theme: 'light' },
 
   globalTypes: {

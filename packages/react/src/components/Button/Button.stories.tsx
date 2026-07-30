@@ -1,15 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { vars } from '@trailpack-ui/theme';
+import { toneNames, vars } from '@trailpack-ui/theme';
 import type { CSSProperties } from 'react';
-import type { ToneName } from '../../index';
 import { Button } from './Button';
-
-/**
- * The theme exports `ToneName` as a type but no runtime list, so the story
- * keeps its own. `satisfies` is what makes a tone added later fail here rather
- * than quietly go undocumented.
- */
-const tones = ['accent', 'neutral', 'info', 'success', 'warning', 'danger'] satisfies ToneName[];
 
 // Inline token values rather than a layout component of this package's own:
 // a story should fail for the component it documents, not for its scaffolding.
@@ -25,6 +17,10 @@ const meta = {
   title: 'Components/Button',
   component: Button,
   args: { children: 'Continue' },
+  // `variant` and `size` need nothing here — react-docgen reads their unions
+  // off Button.tsx. `ToneName` crosses a package boundary, which it does not
+  // follow, so that one control has to be given its options.
+  argTypes: { tone: { options: toneNames, control: 'select' } },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -38,7 +34,7 @@ export const Tones: Story = {
     <div style={column}>
       {(['solid', 'subtle', 'ghost'] as const).map((variant) => (
         <div key={variant} style={row}>
-          {tones.map((tone) => (
+          {toneNames.map((tone) => (
             <Button key={tone} {...args} variant={variant} tone={tone}>
               {tone}
             </Button>

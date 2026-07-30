@@ -3,16 +3,43 @@ import type { ComponentPropsWithRef } from 'react';
 import { cx } from '../../utils/cx';
 import * as styles from './Button.css';
 
-export type ButtonVariant = keyof typeof styles.variant;
-export type ButtonSize = keyof typeof styles.size;
+// Declared here rather than derived from Button.css.ts: these are the
+// component's API, and a `keyof typeof styles.variant` would make renaming a
+// key in a stylesheet a breaking change for consumers. Button.css.ts is
+// annotated against these, so the completeness check runs there.
+export type ButtonVariant = 'solid' | 'subtle' | 'ghost';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ComponentPropsWithRef<'button'> {
-  /** @default 'accent' */
+  /**
+   * Which semantic tone the button carries. Pick it for what the action means,
+   * not for the colour it happens to produce — `danger` for anything
+   * destructive, `neutral` for the secondary action beside a primary one.
+   *
+   * @default 'accent'
+   */
   tone?: ToneName;
-  /** @default 'solid' */
+  /**
+   * How much emphasis the button takes within its tone: `solid` is filled,
+   * `subtle` is tinted with a border, `ghost` is transparent until hovered.
+   * One `solid` button per group of actions is the usual shape.
+   *
+   * @default 'solid'
+   */
   variant?: ButtonVariant;
-  /** @default 'md' */
+  /**
+   * Height, padding and label size together. The hit area stays at least
+   * 2rem tall at `sm`.
+   *
+   * @default 'md'
+   */
   size?: ButtonSize;
+  /**
+   * Stretch to the width of the container instead of the label. For a button
+   * on its own in a narrow column — a form submit, a sheet's confirm.
+   *
+   * @default false
+   */
   fullWidth?: boolean;
 }
 

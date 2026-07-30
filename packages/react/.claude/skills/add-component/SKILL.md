@@ -80,6 +80,13 @@ Two traps worth knowing before the compiler tells you:
   prop called `title` must drop the DOM one.
 - Defaults go in the parameter list (`tone = 'accent'`), not in the body.
 
+Variant unions belong here rather than in the stylesheet — write
+`type <Name>Size = 'sm' | 'md' | 'lg'`, then go back and annotate the stylesheet's
+exports against it (`export const size: Record<<Name>Size, string> = …`), never
+`keyof typeof styles.size`. `tone` is the exception and stays `ToneName`.
+[AGENTS.md](../../../AGENTS.md#styling) has the reasoning; `Button` has the
+shape.
+
 Document the boundary decision in the component's doc comment when it is not
 obvious — why this one holds state, or why this one deliberately does not.
 

@@ -1,5 +1,7 @@
+import type { ToneName } from '@trailpack-ui/theme';
 import { vars } from '@trailpack-ui/theme';
 import { style, styleVariants } from '@vanilla-extract/css';
+import type { ButtonSize, ButtonVariant } from './Button';
 
 export const base = style({
   display: 'inline-flex',
@@ -27,7 +29,10 @@ export const base = style({
   },
 });
 
-export const size = styleVariants({
+// Annotated against the component's own types rather than inferred: a variant
+// or size in the API with no style here fails the build, instead of rendering
+// without a class. The import is type-only and the cycle it closes is erased.
+export const size: Record<ButtonSize, string> = styleVariants({
   sm: {
     minHeight: '2rem',
     padding: `${vars.space[1]} ${vars.space[3]}`,
@@ -75,6 +80,6 @@ const ghost = styleVariants(vars.tone, (tone) => ({
   },
 }));
 
-export const variant = { solid, subtle, ghost };
+export const variant: Record<ButtonVariant, Record<ToneName, string>> = { solid, subtle, ghost };
 
 export const fullWidth = style({ width: '100%' });

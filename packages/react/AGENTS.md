@@ -104,6 +104,36 @@ decisions are actually made.
 - `className` on a component is appended through `cx`, never replaced —
   consumers rely on being able to add to it.
 
+**A variant type is declared with the component, never derived from its
+stylesheet.** `ButtonVariant` is a union written in `Button.tsx`, and the
+stylesheet's exports are annotated against it — in `Button.css.ts`, not at the
+point of use:
+
+```ts
+import type { ButtonSize, ButtonVariant } from './Button';
+
+export const size: Record<ButtonSize, string> = styleVariants({ … });
+export const variant: Record<ButtonVariant, Record<ToneName, string>> = { solid, subtle, ghost };
+```
+
+`keyof typeof styles.variant` reads as the same thing and is not. It makes the
+published API a byproduct of a stylesheet — renaming a key there becomes a
+breaking change nobody sees coming, and the emitted `.d.ts` drags the `.css.ts`
+along to resolve the type. The annotation runs the check the other way instead:
+a variant with no style fails the build, an unused style is only dead CSS.
+
+The import back into the stylesheet is type-only, so the cycle it closes is
+erased before either the bundler or the vanilla-extract compiler sees it, and
+the component's own `.d.ts` stays a plain union. Keeping it there rather than
+re-annotating `styles.variant` in the component is what makes the error land in
+the file that has to change, and leaves the component reading `styles.size[size]`
+directly.
+
+**The one exception is a set the theme owns**, which is the `vars.tone` bullet
+above rather than a contradiction of this. `tone` stays `ToneName` because the
+theme decides which tones exist; `variant` and `size` are this package's API and
+are decided here.
+
 ## The build
 
 - **`preserveModules` is load-bearing, not an optimisation.** It is what allows
