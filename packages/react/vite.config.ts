@@ -1,7 +1,41 @@
 import { fileURLToPath } from 'node:url';
+import { rootLayer } from '@trailpack-ui/theme';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
+
+/**
+ * Puts everything the package emits in one cascade layer, so an app's own CSS —
+ * unlayered, and therefore ahead of any layer whatever its specificity — can
+ * restyle a component through `className`.
+ *
+ * Applied to the bundle rather than to each rule: `style`, `styleVariants` and
+ * `globalStyle` would each need a wrapper that carries the layer, one that a
+ * new stylesheet can forget, and anything a vanilla-extract extension generates
+ * internally (`recipes`, `sprinkles`) calls `style` where no wrapper reaches.
+ * The bundle is the one place every rule has to pass through.
+ */
+const cascadeLayer = (): Plugin => {
+  return {
+    name: 'trailpack-cascade-layer',
+    // Vite's own CSS plugin emits the stylesheet in `generateBundle` as well.
+    // Without `post` this one runs first and there is no asset to wrap yet.
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const stylesheet = bundle['styles.css'];
+
+      // Loud on purpose: unlayered styles look exactly right here and only
+      // fail in an app, as a component that ignores the class it was given.
+      if (stylesheet?.type !== 'asset' || typeof stylesheet.source !== 'string') {
+        return this.error(
+          'No styles.css asset to wrap — the package would ship outside its layer.',
+        );
+      }
+
+      stylesheet.source = `@layer ${rootLayer}.components{${stylesheet.source}}`;
+    },
+  };
+};
 
 /**
  * `styles.css` is a plain stylesheet, so TypeScript has no type for it and
@@ -25,7 +59,7 @@ export {};
 };
 
 export default defineConfig({
-  plugins: [vanillaExtractPlugin(), stylesheetTypeStub()],
+  plugins: [vanillaExtractPlugin(), stylesheetTypeStub(), cascadeLayer()],
   test: {
     // The vanilla-extract plugin above is what lets a test import a component
     // that pulls in a `.css.ts`; without it the import fails outright.

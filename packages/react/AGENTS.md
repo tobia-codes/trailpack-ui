@@ -104,6 +104,31 @@ decisions are actually made.
 - `className` on a component is appended through `cx`, never replaced —
   consumers rely on being able to add to it.
 
+**Everything this package emits ships in the `trailpack.components` cascade
+layer**, which is what makes that appended `className` actually win: unlayered
+CSS beats layered CSS at any specificity, so a consumer overrides
+`:hover:not(:disabled)` with a plain class and no `!important`.
+
+**A stylesheet does nothing for this — the layer is applied to the bundle.**
+`cascadeLayer` in `vite.config.ts` wraps the emitted `styles.css`, so
+`.css.ts` files use vanilla-extract exactly as they read. Per rule it would take
+a wrapper around `style`, `styleVariants` and `globalStyle` that a new
+stylesheet can forget, and it would not reach inside `recipes` or `sprinkles`
+should either ever be used. Two things about that plugin are load-bearing: it is
+`enforce: 'post'`, because Vite emits the stylesheet in `generateBundle` too and
+runs first only that way, and it fails the build when the asset is missing
+rather than shipping unlayered CSS.
+
+It applies at build time, so **the styles Storybook serves are not layered**.
+Nothing there renders differently for it — the layer only ever decides against
+CSS this package does not control, and there is none in Storybook. A story
+demonstrating a consumer override would be the exception, and would have to say
+so.
+
+The layer name is `rootLayer` from `@trailpack-ui/theme` plus `components`. The
+parent is shared because a consumer writes it down to order their own layers
+against ours.
+
 **A variant type is declared with the component, never derived from its
 stylesheet.** `ButtonVariant` is a union written in `Button.tsx`, and the
 stylesheet's exports are annotated against it — in `Button.css.ts`, not at the

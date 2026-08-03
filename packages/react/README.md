@@ -140,6 +140,38 @@ Components take the props of the element they render, so `className`, `ref`,
 `id`, `aria-*` and handlers pass straight through. `className` is appended, not
 replaced.
 
+### Restyling a component
+
+Pass a class and write ordinary CSS. The styles in this package sit in the
+`trailpack.components` cascade layer, and **unlayered CSS beats layered CSS** —
+so your rule wins on the cascade rather than on specificity or on where your
+bundler puts the stylesheet:
+
+```css
+.checkout-button {
+  border-radius: 0;
+  padding-inline: 2rem;
+}
+```
+
+```tsx
+<Button className="checkout-button">Pay</Button>
+```
+
+That holds against the component's heavier selectors too — `:hover:not(:disabled)`
+is (0,3,0) and still loses. No `!important`, no `html body` prefix.
+
+Two things to know:
+
+- **A single token is easier changed than a rule.** Spacing, radius and colour
+  come from CSS variables you can redeclare — see [Overriding
+  tokens](../theme#overriding-tokens). Reach for a class when the change is
+  structural rather than a value.
+- **If your own CSS is layered** — Tailwind, or your own `@layer` blocks — the
+  rule above no longer applies and layer order decides. Declare it once:
+  `@layer trailpack, theme, base, components, utilities;`. See [Cascade
+  layers](../theme#cascade-layers).
+
 **Utilities** — `cx`, which joins class names and drops the falsy ones.
 
 `ToneName` is re-exported from the theme, so a consumer can type a tone prop
@@ -185,7 +217,9 @@ missing test above.
 
 `dist/styles.css` is an export path in `package.json`, so its filename is public
 API. `build.lib.cssFileName` pins it; nothing in the build output may be
-content-hashed.
+content-hashed. The `cascadeLayer` plugin in `vite.config.ts` looks the asset up
+under that name to wrap it in the package's [cascade
+layer](#restyling-a-component), and fails the build if it is not there.
 
 ### Why React 19
 

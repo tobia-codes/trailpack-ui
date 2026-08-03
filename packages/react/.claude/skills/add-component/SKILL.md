@@ -60,6 +60,9 @@ literal, tone variants through `styleVariants`, every interactive state
 qualified with `:not(:disabled)`. Which token to reach for is the
 [`theme` skill](../../../../../skills/theme/SKILL.md).
 
+Write it as vanilla-extract reads — the cascade layer the package ships in is
+applied to the bundle, and there is nothing to remember per rule.
+
 What those do not cover:
 
 - Scale variants (padding, gap): `styleVariants(vars.space, …)`.

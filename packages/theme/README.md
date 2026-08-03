@@ -207,7 +207,7 @@ nothing is forked, and components keep reading the same token — they resolve t
 your value.
 
 ```css
-/* app.css, imported after @trailpack-ui/theme/theme.css */
+/* app.css */
 :root {
   --trailpack-space-4: 1.25rem;
   --trailpack-tone-brand-solid: #0f766e;
@@ -215,21 +215,22 @@ your value.
 }
 ```
 
-Two things decide whether it takes effect:
+**Your declaration wins on the cascade, not on order.** Everything this package
+emits sits in a cascade layer, and unlayered CSS beats layered CSS whatever its
+specificity and wherever the browser sees it — so the override above holds
+without `!important`, without a heavier selector, and no matter how your bundler
+sorts the stylesheets. The one case that needs care is an app that puts its
+_own_ CSS in layers too; see [Cascade layers](#cascade-layers).
 
-- **Order.** The light theme is declared on `:root` too, so an override at the
-  same specificity only wins if the browser sees it later. Import your
-  stylesheet after `theme.css`, or use a selector with more weight —
-  `html:root`, or a class on a wrapper.
-- **Scope.** A wrapper class overrides for its subtree only, which is how you
-  give one section its own spacing without touching the rest:
+A wrapper class overrides for its subtree only, which is how you give one
+section its own spacing without touching the rest:
 
-  ```css
-  .compact {
-    --trailpack-space-4: 0.75rem;
-    --trailpack-space-6: 1rem;
-  }
-  ```
+```css
+.compact {
+  --trailpack-space-4: 0.75rem;
+  --trailpack-space-6: 1rem;
+}
+```
 
 Both themes read the same variables, so an override on `:root` applies in dark
 mode as well — that is usually not what you want for a colour. Put colour
@@ -249,6 +250,44 @@ What this does not do is check anything. The contrast assertions in
 `src/themes.test.ts` cover the values shipped here, not the ones you substitute,
 and `breakpoints` are not variables at all — they are inlined into media queries
 at build time and cannot be overridden this way.
+
+## Cascade layers
+
+Everything Trailpack emits — this stylesheet and the component styles in
+`@trailpack-ui/react` — sits under one cascade layer:
+
+```css
+@layer trailpack {
+  @layer theme; /* the token declarations in this package */
+  @layer components; /* component styles, in @trailpack-ui/react */
+}
+```
+
+That is what makes overriding work by writing ordinary CSS. **Unlayered rules
+beat layered ones**, regardless of specificity and regardless of source order —
+so `.my-button { padding: 0 }` in your app wins over a component's styles even
+where those use a heavier selector like `:hover:not(:disabled)`.
+
+Each package declares the sublayer it emits into. Their order relative to each
+other is not fixed anywhere and does not need to be: one declares variables, the
+other reads them, so they never decide the same property.
+
+### If your own CSS is layered
+
+Then the rule above no longer applies to it, and **layer order decides**. Layers
+rank by where they are first seen, so a Trailpack stylesheet loaded after
+Tailwind would rank above `utilities` and beat `class="px-8"`. Declare the order
+yourself, once, before any of it is imported:
+
+```css
+@layer trailpack, theme, base, components, utilities;
+```
+
+`rootLayer` is exported: it is the parent a package building on these tokens
+nests its own sublayer under, and `@trailpack-ui/react` is the first one. It is
+as public as the variable names, and it does not change. The sublayer holding
+the token declarations is not exported — CSS of your own belongs outside these
+layers, where it wins.
 
 ## Development
 

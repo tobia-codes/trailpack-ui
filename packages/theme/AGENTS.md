@@ -38,6 +38,18 @@ Several things about it are easy to break:
   app — nothing here can observe them. The contract is declared and filled in
   two steps for that reason alone; `createGlobalTheme(':root', lightTokens)`
   would compile and produce hashes again.
+- **`rootLayer` in `src/layers.css.ts` is public API; `themeLayer` is not.** An
+  app writes the parent's name down to order its own layers against ours, so it
+  is `globalLayer` rather than the hashed `layer`, and it does not change. The
+  sublayer stays internal because nothing outside writes into it — a package
+  shipping styles of its own declares its own sublayer under `rootLayer`, and
+  an app's CSS belongs outside every one of them, which is where it wins.
+- **A token declaration outside `themeLayer` cannot be overridden.** Both
+  `createGlobalTheme` and `createTheme` in `src/themes.css.ts` take
+  `'@layer': themeLayer` in their token object. Without it the values are
+  unlayered, which puts them level with a consumer's own CSS and hands the
+  decision back to source order — the thing the layer exists to remove. Both
+  themes stay in the _same_ layer, or the dark class stops beating `:root`.
 - **What gets published is whatever `src/index.ts` reaches.**
   `tsconfig.build.json` narrows `include` to that one entry, so the module graph
   decides the declaration output — `src/storybook`, `scripts` and `guidance.ts`
