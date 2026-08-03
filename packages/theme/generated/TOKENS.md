@@ -25,7 +25,7 @@ Reach for tokens by role, not by appearance. The question is never "which grey l
 | `color.*` | Neutral chrome with no meaning attached: the page, cards, dividers, body and secondary text. |
 | `space, radius, font, iconSize, shadow, zIndex` | Geometry and type. Never theme-dependent except for shadows. |
 
-> The paths on `vars` are the public API. The CSS variable names behind them are vanilla-extract hashes and can change between releases — always go through `vars`, never type a `var(--…)` by hand.
+> The paths on `vars` are the public API, and so are the CSS variable names behind them: a path joined with dashes and prefixed, so `vars.color.surface` is `--trailpack-color-surface`. Read tokens through `vars` anyway — a hand-typed name skips the type check and keeps compiling after the token it names is gone. Typing one is for the app overriding a token, not for a component consuming it.
 
 ### Light and dark
 

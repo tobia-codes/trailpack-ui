@@ -28,12 +28,12 @@ installed by you rather than nested underneath this package. For React that is
 the usual reason — two copies of React in one tree do not work. For the theme
 the reason is specific to how the tokens are built:
 
-> The `vars` object holds vanilla-extract's hashed variable names, and this
-> package inlines those hashes into its stylesheet at build time. If the app
-> loads `theme.css` from a _different_ theme version, the names on the two sides
-> no longer agree and every component renders unstyled — with no error, in the
-> browser, at runtime. A peer dependency turns that into an install-time
-> warning instead.
+> The `vars` object holds CSS variable names, and this package inlines them
+> into its stylesheet at build time. If the app loads `theme.css` from a
+> _different_ theme version, a name this package inlined may not be declared
+> there — and an undeclared variable is not an error, it is a property the
+> browser drops, so the component renders wrong at runtime with nothing said
+> anywhere. A peer dependency turns that into an install-time warning instead.
 
 Keep the two versions in step.
 

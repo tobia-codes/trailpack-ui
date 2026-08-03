@@ -23,10 +23,10 @@ import { vars } from '@trailpack-ui/theme';
 `.css.ts` files, and anywhere a CSS value is read from JavaScript —
 vanilla-extract is only needed if the app writes its own `.css.ts`.
 
-It does **not** work in a hand-written `.css` or `.scss` file: those cannot
-import `vars`, and the variable names are build-time hashes with nothing stable
-to type. Reach the tokens from JavaScript, or alias them once into names the app
-owns.
+A hand-written `.css` or `.scss` file cannot import `vars`, but the variable
+names are stable and public: a path joined with dashes and prefixed, so
+`vars.space[4]` is `var(--trailpack-space-4)`. Use that where there is no way
+to reach JavaScript — and nowhere else.
 
 Dark mode is a class: put `darkTheme` (exported from the same package) on
 `<html>` for the whole app, or on any subtree to invert just that part.
@@ -42,10 +42,10 @@ Dark mode is a class: put `darkTheme` (exported from the same package) on
    contrast-checked and are how AA failures get in.
 4. **`tone.*.solid` is a background, never a text colour.** Use `tone.*.text`
    for tinted text.
-5. **Never type a `var(--…)` by hand.** The variable names are build-time
-   hashes; only the paths on `vars` are stable. If a file cannot import
-   `vars`, it cannot use these tokens — that is a signal to move the styling,
-   not to copy a hash.
+5. **Read tokens through `vars`, not by typing `var(--…)`.** The names are
+   stable, so a hand-typed one works — and skips the type check, which means it
+   keeps compiling after the token it names is gone. Type a name only where the
+   app is deliberately overriding a token.
 6. **Write layout mobile first.** The styles outside any media query are the
    small-screen ones, and a breakpoint only ever adds to them. Conditions come
    from `media` — imported from the same package, but not through `vars`,

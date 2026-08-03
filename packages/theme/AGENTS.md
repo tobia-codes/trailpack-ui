@@ -30,6 +30,14 @@ Several things about it are easy to break:
 - **`dist/theme.css` is an export path in `package.json`, so its filename is
   public API.** It is pinned via `build.lib.cssFileName` in `vite.config.ts`;
   nothing in the build output may be content-hashed.
+- **The CSS variable names are public API too.**
+  `createGlobalThemeContract` in `src/themes.css.ts` names them
+  `--trailpack-<path joined with dashes>` precisely so a consumer can override
+  one from a stylesheet they own. Going back to a name vanilla-extract chooses,
+  or changing the prefix or the join, silently drops every override in every
+  app — nothing here can observe them. The contract is declared and filled in
+  two steps for that reason alone; `createGlobalTheme(':root', lightTokens)`
+  would compile and produce hashes again.
 - **What gets published is whatever `src/index.ts` reaches.**
   `tsconfig.build.json` narrows `include` to that one entry, so the module graph
   decides the declaration output — `src/storybook`, `scripts` and `guidance.ts`
@@ -55,10 +63,15 @@ Several things about it are easy to break:
 
 ## A changed token reaches further than this package
 
-`packages/react` inlines the hashed variable names into its own stylesheet at
-build time. Renaming a token, or moving it in the contract, therefore breaks
-that package's CSS — silently, because the names are values rather than
-imports. Run the workspace build, not just this package's.
+`packages/react` inlines the variable names into its own stylesheet at build
+time. Renaming a token, or moving it in the contract, therefore breaks that
+package's CSS — silently, because the names are values rather than imports. Run
+the workspace build, not just this package's.
+
+A rename now reaches past the workspace as well: the name is what a consuming
+app types to override the token, so moving `iconSize.md` to `icon.size.md`
+renames `--trailpack-iconSize-md` and leaves that app's override pointing at
+nothing. Treat the path on `vars` as the published thing it is.
 
 Removing a tone is the sharper case: `styleVariants(vars.tone, …)` over there is
 built from the contract, so a tone that disappears takes a component variant

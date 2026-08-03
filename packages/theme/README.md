@@ -84,28 +84,36 @@ with nothing installed:
 import { toneNames, type ToneName } from '@trailpack-ui/theme';
 ```
 
-### Where the tokens reach, and where they do not
+### Where the tokens reach
 
-Both the variable names and the `darkTheme` class name are vanilla-extract
-hashes — but they ship as _values_, which is why the hashing is invisible as
-long as you go through `vars` and `darkTheme`.
+| Context                                | Works                                                     |
+| -------------------------------------- | --------------------------------------------------------- |
+| Inline styles, CSS-in-JS, any JS value | Yes, with nothing installed                               |
+| Your own `.css.ts`                     | Yes, but `style()` means vanilla-extract becomes your dep |
+| A hand-written `.css` or `.scss` file  | Yes, by variable name — see below                         |
 
-| Context                                | Works                                                       |
-| -------------------------------------- | ----------------------------------------------------------- |
-| Inline styles, CSS-in-JS, any JS value | Yes, with nothing installed                                 |
-| Your own `.css.ts`                     | Yes, but `style()` means vanilla-extract becomes your dep   |
-| A hand-written `.css` or `.scss` file  | **No** — it cannot import `vars`, and the names are not API |
+The variable names are ours rather than vanilla-extract's hashes, and they are
+public API: **a path on `vars`, joined with dashes and prefixed with
+`trailpack`.** `vars.color.surface` is `--trailpack-color-surface`,
+`vars.space[4]` is `--trailpack-space-4`, `vars.tone.danger.onSolid` is
+`--trailpack-tone-danger-onSolid`. Key casing is kept as it is, so the mapping
+runs in both directions with no table to consult.
 
-The hashes are deterministic across rebuilds, but they are not part of the
-public API: they shift if the file path, the package name or the declaration
-order changes. So a plain stylesheet has nothing stable to type.
-
-If you need the tokens in hand-written CSS anyway, alias them once at startup
-into names you own, and use those:
-
-```ts
-document.documentElement.style.setProperty('--app-surface', vars.color.surface);
+```css
+.callout {
+  padding: var(--trailpack-space-4);
+  background: var(--trailpack-tone-info-subtle);
+}
 ```
+
+Prefer `vars` wherever you can reach JavaScript — a hand-typed name is not type
+checked, so it keeps working after the token it names is gone. The two places
+the name is the right answer are a stylesheet that cannot import anything, and
+[overriding a token](#overriding-tokens).
+
+The `darkTheme` class name is a hash and stays one: it ships as a value, and
+there is nothing to type by hand because you put it on an element from
+JavaScript.
 
 ### The token set
 
@@ -147,10 +155,10 @@ export const Callout = ({ tone = 'info' }: { tone?: ToneName }) => {
 };
 ```
 
-The paths on `vars` are the public API; the variable names behind them are not,
-and can change between releases. Overriding tokens to build a custom theme is
-not supported yet — `createTheme` requires the whole contract, and there is no
-helper for producing one.
+A tone is overridden like any other token, one step at a time — see
+[Overriding tokens](#overriding-tokens). Keep the pairings intact when you do:
+`onSolid` is the text colour tested against `solid`, so changing one without the
+other is how a contrast regression gets in.
 
 ### Breakpoints
 
@@ -190,6 +198,57 @@ The widths are in `rem` on purpose: inside a media query `rem` resolves against
 the browser's default font size rather than the page's, so a reader who has
 raised it keeps the narrower layout for longer. `BreakpointName` types a prop or
 a lookup over the four.
+
+## Overriding tokens
+
+Every token is a CSS variable under a name you can type, so an app changes one
+by declaring it again in a stylesheet of its own. Nothing has to be rebuilt,
+nothing is forked, and components keep reading the same token — they resolve to
+your value.
+
+```css
+/* app.css, imported after @trailpack-ui/theme/theme.css */
+:root {
+  --trailpack-space-4: 1.25rem;
+  --trailpack-tone-brand-solid: #0f766e;
+  --trailpack-tone-brand-onSolid: #ffffff;
+}
+```
+
+Two things decide whether it takes effect:
+
+- **Order.** The light theme is declared on `:root` too, so an override at the
+  same specificity only wins if the browser sees it later. Import your
+  stylesheet after `theme.css`, or use a selector with more weight —
+  `html:root`, or a class on a wrapper.
+- **Scope.** A wrapper class overrides for its subtree only, which is how you
+  give one section its own spacing without touching the rest:
+
+  ```css
+  .compact {
+    --trailpack-space-4: 0.75rem;
+    --trailpack-space-6: 1rem;
+  }
+  ```
+
+Both themes read the same variables, so an override on `:root` applies in dark
+mode as well — that is usually not what you want for a colour. Put colour
+overrides on each theme separately, the dark one under the class you have put
+`darkTheme` on:
+
+```css
+:root {
+  --trailpack-color-surface: #fbfaf9;
+}
+.my-dark-root {
+  --trailpack-color-surface: #1c1a19;
+}
+```
+
+What this does not do is check anything. The contrast assertions in
+`src/themes.test.ts` cover the values shipped here, not the ones you substitute,
+and `breakpoints` are not variables at all — they are inlined into media queries
+at build time and cannot be overridden this way.
 
 ## Development
 

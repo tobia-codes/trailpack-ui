@@ -153,10 +153,10 @@ are decided here.
   `src/index.ts`.** The root re-exports the groups with `export *`; exporting
   in both places is how a symbol ends up published twice.
 - `react` and `@trailpack-ui/theme` are **peer** dependencies and must stay
-  that way. The theme especially: a second copy means mismatched
-  vanilla-extract hashes and silently unstyled components. They are listed
-  under `devDependencies` as well so the package can build and run its
-  Storybook.
+  that way. The theme especially: a second copy at a different version means
+  variable names inlined here that the loaded `theme.css` never declares, and a
+  browser drops an undeclared variable silently. They are listed under
+  `devDependencies` as well so the package can build and run its Storybook.
 - `packages/theme` must be built before this package builds or its Storybook
   starts. From the root, Turborepo handles the ordering.
 
