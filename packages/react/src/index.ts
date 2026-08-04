@@ -1,4 +1,5 @@
 export * from './components';
+export * from './primitives';
 export * from './utils';
 
 /** Re-exported so a consumer can type a tone prop without depending on the theme directly. */

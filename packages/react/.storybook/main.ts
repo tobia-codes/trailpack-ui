@@ -6,8 +6,8 @@ const config: StorybookConfig = {
   // the exception, and lives here with the configuration it belongs to.
   stories: [
     './**/*.mdx',
-    '../src/components/**/*.stories.tsx',
-    '../src/components/**/storybook/**/*.mdx',
+    '../src/{components,primitives}/**/*.stories.tsx',
+    '../src/{components,primitives}/**/storybook/**/*.mdx',
   ],
   addons: ['@storybook/addon-docs'],
   framework: '@storybook/react-vite',

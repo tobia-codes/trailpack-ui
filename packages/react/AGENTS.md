@@ -44,13 +44,44 @@ graph. Prefer lifting the state into a hook the consumer calls — the package
 has no `src/hooks` at the moment, so that means creating it, with its own
 barrel and a `./hooks` export path.
 
+## Primitive or component
+
+`src/primitives` and `src/components` are two published groups rather than one
+group presented two ways, and three clauses decide. All three have to hold:
+
+- **No `tone` and no `variant` prop.** Both exist to select a styled surface —
+  `tone` is the theme's vocabulary, `variant` is this package's own API.
+- **No filled surface**: no `background`, no `box-shadow`. `color` and a
+  hairline `border-color` are allowed, which is what makes a `Divider` a
+  primitive rather than the edge case it looks like.
+- **It names a relationship, not an object.** `Stack`, `Grid` and `Text` say how
+  content sits together; a `Button` or a `Card` is a thing somebody would point
+  at.
+
+**A component may import a primitive; a primitive may never import a
+component.** One that needs one is not a primitive, and that direction is what
+keeps the split from coming down to taste.
+
+**Primitives are never nested.** Nesting is what marks a component private
+(below), and `src/primitives` is the shared base anything may build on, so it
+lies flat.
+
+Getting it wrong is silent: each folder is its own barrel behind its own
+subpath, so a misfiled component is published API that nobody decided to cut
+that way — and moving it across later is a breaking change for anyone importing
+it from the group it left.
+
 ## Where a component's files go
 
 Component, styles and story share one folder under `src/components` — see
 [Where stories go](../../AGENTS.md#where-stories-go) for the rule and its one
 exception. This package has components, so it applies here in full: there is no
 `src/storybook` directory. The theme decorator and the package overview live in
-`.storybook`, with the configuration they belong to.
+`.storybook`, with the configuration they belong to. **This section and
+[Styling](#styling) read the same for `src/primitives`**: the same
+folder-per-component shape, the same stylesheet and story beside it, the same
+variant union declared with the component rather than derived from its
+stylesheet.
 
 A component that needs smaller components of its own keeps them in a
 `components/` folder beneath it, each in the same folder-per-component shape;
@@ -168,9 +199,9 @@ are decided here.
   may be content-hashed.
 - **What gets published is whatever the entry points reach.**
   `tsconfig.build.json` narrows `include` to them, so stories and tests are
-  never in the program. The package has three — `src/index.ts` and the two
-  group barrels behind `./components` and `./utils` — and they are listed in
-  **three** places that have to agree: `exports` in `package.json`,
+  never in the program. The package has four — `src/index.ts` and the three
+  group barrels behind `./components`, `./primitives` and `./utils` — and they
+  are listed in **three** places that have to agree: `exports` in `package.json`,
   `build.lib.entry` in `vite.config.ts`, `include` in `tsconfig.build.json`.
   Miss the last one and the subpath ships without declarations, which nothing
   fails on until a consumer imports it.

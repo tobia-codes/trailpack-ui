@@ -1,10 +1,10 @@
 ---
 name: add-component
 description: >-
-  Use when adding a new component to @trailpack-ui/react, or when moving an
-  existing one into the package. Walks the folder layout, the client-boundary
-  decision, the barrel export and the checks that have to pass, in the order
-  that avoids rework.
+  Use when adding a new component or primitive to @trailpack-ui/react, or when
+  moving an existing one into the package. Walks the group it belongs to, the
+  folder layout, the client-boundary decision, the barrel export and the checks
+  that have to pass, in the order that avoids rework.
 ---
 
 # Adding a component to @trailpack-ui/react
@@ -14,7 +14,23 @@ The rules behind these steps live in [AGENTS.md](../../../AGENTS.md) and the
 in. `src/components/Button` is the worked example for every step — read it
 before starting rather than working from this page alone.
 
-## 1. Decide the boundary first
+## 1. Pick the group
+
+`src/primitives` or `src/components`, and the three clauses that decide are in
+[AGENTS.md](../../../AGENTS.md#primitive-or-component). The short form: a
+primitive carries no `tone` and no `variant`, paints no filled surface, and
+names a relationship — `Stack`, `Text`, `Divider` — rather than an object.
+
+It comes first because it picks the folder, the barrel and the subpath, and
+because both groups are published: moving something across later is a breaking
+change for anyone who imported it from the group it left. Every step below reads
+the same in either folder; where the page says `src/components`, substitute
+`src/primitives` throughout if that is the answer here.
+
+`src/primitives/Stack` is the worked example on that side, and `Button` on the
+other; the two folders read the same.
+
+## 2. Decide the boundary
 
 **Do this before writing anything else** — it shapes the rest, and changing it
 later means rewriting the component. The rule itself is in
@@ -26,7 +42,7 @@ There is no `src/hooks` at the moment, so that means creating it: a barrel
 beside the hook, a `./hooks` entry in `exports`, `build.lib.entry` and
 `tsconfig.build.json`.
 
-## 2. Create the folder
+## 3. Create the folder
 
 ```
 src/components/<Name>/
@@ -53,7 +69,7 @@ src/components/Input/
   utils/                only what Input alone needs
 ```
 
-## 3. Write `<Name>.css.ts`
+## 4. Write `<Name>.css.ts`
 
 [AGENTS.md](../../../AGENTS.md#styling) has the rules: `vars` only and never a
 literal, tone variants through `styleVariants`, every interactive state
@@ -70,7 +86,7 @@ What those do not cover:
   `:focus-visible`.
 - Any `transition` needs a `(prefers-reduced-motion: reduce)` escape.
 
-## 4. Write `<Name>.tsx`
+## 5. Write `<Name>.tsx`
 
 An arrow function. Props extend `ComponentPropsWithRef<'element'>` so
 `className`, `ref`, `id`, `aria-*` and handlers pass through, and `className` is
@@ -93,38 +109,39 @@ shape.
 Document the boundary decision in the component's doc comment when it is not
 obvious — why this one holds state, or why this one deliberately does not.
 
-## 5. Write the story beside it
+## 6. Write the story beside it
 
 `<Name>.stories.tsx` in the same folder, CSF3, `satisfies Meta<typeof X>`.
 Helpers (a tone list, layout objects) stay in the story file until a second
 story needs them. Only add a `storybook/` folder if the component needs written
 documentation beyond its stories.
 
-## 6. Export from `src/components/index.ts`
+## 7. Export from the group barrel
 
-The component and its public prop types, alphabetically among the existing
-components. That is the only place to add it — `src/index.ts` re-exports the
-group with `export *`, so the package root picks it up on its own. No barrel
-ever carries `'use client'`; none of them is a boundary.
+`src/components/index.ts`, or `src/primitives/index.ts` — the component and its
+public prop types, alphabetically among the ones already there. That is the only
+place to add it: `src/index.ts` re-exports each group with `export *`, so the
+package root picks it up on its own. No barrel ever carries `'use client'`;
+none of them is a boundary.
 
 Nothing a barrel does not reach is published: `tsconfig.build.json` builds from
 the entry points alone, so a component that is not exported ships nothing, and
 the story next to it is never in the program.
 
-## 7. Run the checks
+## 8. Run the checks
 
 ```sh
 pnpm build && pnpm test && pnpm lint && pnpm format
 ```
 
-The suite covers `Button` and `cx`; nothing in it checks step 1, so check that
+The suite covers `Button` and `cx`; nothing in it checks step 2, so check that
 one by hand: if your component carries a directive, `dist/<Name>/<Name>.js`
 starts with it, and no barrel does.
 
 Then `pnpm dev` and look at the story in both themes via the toolbar. Nothing
 verifies that a story renders; a broken one fails in the browser, not in CI.
 
-## 8. Update the README
+## 9. Update the README
 
 The API section lists what the package exports, and the directive table in
 _Server rendering and Next.js_ lists which modules carry `'use client'`. A new

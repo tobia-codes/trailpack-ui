@@ -8,10 +8,10 @@ This is the package for everything React needs and nothing needs a heavy
 dependency for. Anything that would pull in a large one — a data grid, a date
 picker, a charting layer — gets its own package rather than a slot here.
 
-It is being built up one component at a time. `Button` is what exists so far;
-the structure around it — the token styling, the client-boundary rules, the
-build — is settled, so a new component is a new folder under `src/components`
-and nothing else.
+It is being built up one piece at a time. `Button` and the `Stack` primitive are
+what exist so far; the structure around them — the token styling, the
+client-boundary rules, the build — is settled, so a new one is a new folder
+under `src/components` or `src/primitives` and nothing else.
 
 **It renders on the server and in the browser, in any React setup.** Next.js App
 Router is supported specifically, but not required, and nothing here is written
@@ -67,11 +67,12 @@ everything below it switches. See the [theme README](../theme#dark-mode).
 
 ### Entry points
 
-Everything is reachable from the package root. The two subpaths export the same
-symbols, grouped:
+Everything is reachable from the package root. The three subpaths export the
+same symbols, grouped:
 
 ```ts
 import { Button } from '@trailpack-ui/react/components';
+import { Stack } from '@trailpack-ui/react/primitives';
 import { cx } from '@trailpack-ui/react/utils';
 ```
 
@@ -96,7 +97,7 @@ state changes the picture:
 
 | Module                           | Directive | Why                                                |
 | -------------------------------- | --------- | -------------------------------------------------- |
-| `Button`, `cx`                   | no        | No state, no effects, no browser APIs              |
+| `Button`, `Stack`, `cx`          | no        | No state, no effects, no browser APIs              |
 | a module calling React's runtime | **yes**   | `useState`, `useEffect`, `useSyncExternalStore`, … |
 
 The consequence is worth being precise about, because it is the whole point:
@@ -136,9 +137,15 @@ The directive only ever concerns React Server Components.
 **Components** — `Button`, in every tone the token set carries, with `solid`,
 `subtle` and `ghost` variants and three sizes.
 
-Components take the props of the element they render, so `className`, `ref`,
-`id`, `aria-*` and handlers pass straight through. `className` is appended, not
-replaced.
+**Primitives** — `Stack`, which lays its children out in one direction with one
+gap from the spacing scale. A primitive carries no `tone` and no `variant` and
+paints no surface of its own; it places content rather than being something on
+the page. That is the whole line between the two groups, and why each has its
+own subpath.
+
+Everything here takes the props of the element it renders, so `className`,
+`ref`, `id`, `aria-*` and handlers pass straight through. `className` is
+appended, not replaced.
 
 ### Restyling a component
 
@@ -233,18 +240,23 @@ wrapper everywhere — reversible, but not for free.
 theme package does it. The components are under **Components**, with the light
 and dark toolbar switch driving the same class swap a consuming app performs.
 
-**A story lives beside the component it documents**, in that component's folder
-under `src/components` — there is no separate stories directory. A component
-that needs written documentation beyond its stories gets a `storybook/` folder
-next to them for the MDX; nothing else goes there. The overview page and the
-theme decorator are the exceptions and sit in `.storybook`, since they belong
-to the Storybook setup rather than to any one component.
+**A story lives beside the component it documents**, in that component's own
+folder under `src/components` or `src/primitives` — there is no separate stories
+directory. A component that needs written documentation beyond its stories gets
+a `storybook/` folder next to them for the MDX; nothing else goes there. The
+overview page and the theme decorator are the exceptions and sit in
+`.storybook`, since they belong to the Storybook setup rather than to any one
+component.
 
 ```
 src/components/Button/
   Button.tsx
   Button.css.ts
   Button.stories.tsx
+src/primitives/Stack/
+  Stack.tsx
+  Stack.css.ts
+  Stack.stories.tsx
 ```
 
 Nothing verifies that a story _renders_. `pnpm build:storybook` only bundles
