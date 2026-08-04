@@ -67,20 +67,18 @@ everything below it switches. See the [theme README](../theme#dark-mode).
 
 ### Entry points
 
-Everything is reachable from the package root. The three subpaths export the
-same symbols, grouped:
+One path for the code, one for the stylesheet:
 
 ```ts
-import { Button } from '@trailpack-ui/react/components';
-import { Stack } from '@trailpack-ui/react/primitives';
-import { cx } from '@trailpack-ui/react/utils';
+import { Button, Stack, cx } from '@trailpack-ui/react';
+import '@trailpack-ui/react/styles.css';
 ```
 
-Reach for them when you want the grouping to be visible at the import site.
-They are not needed for tree-shaking: the build emits one file per module and
-the package declares `sideEffects: ["*.css"]`, so a bundler drops what you do
-not use whichever path you import from. `styles.css` is unaffected either way —
-it stays one stylesheet, imported once.
+There are no per-group subpaths, and you lose nothing by it. Tree-shaking does
+not depend on them: the build emits one file per module and the package
+declares `sideEffects: ["*.css"]`, so a bundler drops what you do not use. A
+build importing only `Button` comes out byte-identical either way. `styles.css`
+stays one stylesheet, imported once.
 
 ## Server rendering and Next.js
 
@@ -140,8 +138,8 @@ The directive only ever concerns React Server Components.
 **Primitives** — `Stack`, which lays its children out in one direction with one
 gap from the spacing scale. A primitive carries no `tone` and no `variant` and
 paints no surface of its own; it places content rather than being something on
-the page. That is the whole line between the two groups, and why each has its
-own subpath.
+the page. That is the whole line between the two groups. Both are exported from
+the package root, so it is a line in the source rather than in the import path.
 
 Everything here takes the props of the element it renders, so `className`,
 `ref`, `id`, `aria-*` and handlers pass straight through. `className` is

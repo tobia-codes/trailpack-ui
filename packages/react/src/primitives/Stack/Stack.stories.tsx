@@ -37,6 +37,14 @@ const meta = {
       </>
     ),
   },
+  // `direction`, `align` and `justify` need nothing here — react-docgen reads
+  // their unions off Stack.tsx. `gap` is a `keyof typeof` over an import, which
+  // it resolves to `unknown`, and an unknown type gets the object control.
+  // Derived from the scale rather than listed, so a step added to the theme
+  // shows up here on its own.
+  argTypes: {
+    gap: { options: Object.keys(vars.space).map(Number), control: 'select' },
+  },
 } satisfies Meta<typeof Stack>;
 
 export default meta;

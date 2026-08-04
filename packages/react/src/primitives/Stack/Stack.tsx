@@ -61,15 +61,17 @@ export interface StackProps extends ComponentPropsWithRef<'div'> {
  * a component without bringing a surface of its own. Holds no state and calls
  * no hook, so it renders on the server as it is.
  */
-export const Stack = ({
-  direction = 'column',
-  gap = 4,
-  align = 'stretch',
-  justify = 'start',
-  wrap = false,
-  className,
-  ...rest
-}: StackProps) => {
+export const Stack = (props: StackProps) => {
+  const {
+    direction = 'column',
+    gap = 4,
+    align = 'stretch',
+    justify = 'start',
+    wrap = false,
+    className,
+    ...rest
+  } = props;
+
   return (
     <div
       className={cx(

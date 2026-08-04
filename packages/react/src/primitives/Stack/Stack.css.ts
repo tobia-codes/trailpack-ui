@@ -4,9 +4,10 @@ import type { StackAlign, StackDirection, StackJustify } from './Stack';
 
 export const base = style({
   display: 'flex',
-  // A Stack is usually a flex child of another one, and a flex child refuses to
-  // shrink below its content: without this a long unbroken string or a table
-  // inside one stretches the whole row past its container.
+  // `min-width: auto` on a flex item is a refusal to shrink below the content's
+  // min-content size, and it applies on the main axis only. So a Stack inside a
+  // `direction="row"` Stack pushes the whole row past its container as soon as
+  // it holds something unbreakable — a long URL, a table.
   minWidth: 0,
 });
 

@@ -72,13 +72,12 @@ export default defineConfig({
   build: {
     sourcemap: true,
     lib: {
-      // One per code `exports` entry in package.json; tsconfig.build.json lists
-      // the same four, or the subpath ships without declarations.
+      // The one code `exports` entry in package.json; tsconfig.build.json names
+      // the same file, or the package ships without declarations. An entry is
+      // also the only thing that survives as a file — Rollup folds a pure
+      // re-export module into its importer, so the group barrels do not.
       entry: {
         index: 'src/index.ts',
-        'components/index': 'src/components/index.ts',
-        'primitives/index': 'src/primitives/index.ts',
-        'utils/index': 'src/utils/index.ts',
       },
       formats: ['es'],
       cssFileName: 'styles',

@@ -51,15 +51,17 @@ export interface ButtonProps extends ComponentPropsWithRef<'button'> {
  * for it; passing a handler makes the *caller* the client boundary, and this
  * module joins that graph on its own.
  */
-export const Button = ({
-  tone = 'accent',
-  variant = 'solid',
-  size = 'md',
-  fullWidth = false,
-  type = 'button',
-  className,
-  ...rest
-}: ButtonProps) => {
+export const Button = (props: ButtonProps) => {
+  const {
+    tone = 'accent',
+    variant = 'solid',
+    size = 'md',
+    fullWidth = false,
+    type = 'button',
+    className,
+    ...rest
+  } = props;
+
   return (
     <button
       type={type}

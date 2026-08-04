@@ -72,8 +72,8 @@ root, and at the root the same level forks by visibility:
 src/components/Input/
   utils/                only what Input alone needs
 src/internal/utils/     a second component needs it too
-src/utils/              …and it is worth shipping — this is the ./utils
-                        subpath, so it is published API
+src/utils/              …and it is worth shipping — src/index.ts re-exports
+                        this one, so it is published API
 ```
 
 The second consumer forces the move up. It does not decide the fork: `internal/`

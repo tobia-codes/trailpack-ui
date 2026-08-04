@@ -24,7 +24,11 @@ export const withTheme: Decorator = (Story, context) => {
         fontFamily: `"Nunito Sans Variable", ${vars.font.family.sans}`,
         fontSize: vars.font.size.md,
         lineHeight: vars.font.lineHeight.normal,
-        minHeight: '100vh',
+        // Fills the canvas, so the theme's background is the frame rather than
+        // a box sitting on Storybook's white. Not in Docs: there every story is
+        // a block on one page, and a viewport height each leaves the page
+        // mostly empty.
+        minHeight: context.viewMode === 'docs' ? undefined : '100vh',
         padding: vars.space[8],
       }}
     >

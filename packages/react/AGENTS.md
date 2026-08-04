@@ -28,9 +28,8 @@ short form:
   `onClick`. It works on both sides that way; the caller passing the handler is
   the boundary.
 - No barrel ever gets one — not `src/index.ts`, not the per-group
-  `src/{components,utils}/index.ts` behind the subpath exports. A directive
-  there makes everything imported through it a client boundary for every
-  consumer.
+  `src/{components,primitives,utils}/index.ts` behind it. A directive there
+  makes everything imported through it a client boundary for every consumer.
 
 **Nothing enforces this automatically.** The package has exactly one client
 module, `src/utils/createStrictContext.ts`; everything else is server-safe, and
@@ -42,12 +41,12 @@ Adding state to an existing server-safe component is a real decision, not a
 detail: it moves that component and everything rendered with it into the client
 graph. Prefer lifting the state into a hook the consumer calls — the package
 has no `src/hooks` at the moment, so that means creating it, with its own
-barrel and a `./hooks` export path.
+barrel re-exported from `src/index.ts` like the other groups.
 
 ## Primitive or component
 
-`src/primitives` and `src/components` are two published groups rather than one
-group presented two ways, and three clauses decide. All three have to hold:
+`src/primitives` and `src/components` are two groups rather than one group
+presented two ways, and three clauses decide. All three have to hold:
 
 - **No `tone` and no `variant` prop.** Both exist to select a styled surface —
   `tone` is the theme's vocabulary, `variant` is this package's own API.
@@ -66,10 +65,11 @@ keeps the split from coming down to taste.
 (below), and `src/primitives` is the shared base anything may build on, so it
 lies flat.
 
-Getting it wrong is silent: each folder is its own barrel behind its own
-subpath, so a misfiled component is published API that nobody decided to cut
-that way — and moving it across later is a breaking change for anyone importing
-it from the group it left.
+Both groups reach a consumer through the same root export, so a misfiled
+component costs nothing at the import site and moving it across later breaks
+nobody. That is what makes the folder the only record of the split: get it
+wrong and the split stops meaning anything, quietly, with the import rule above
+as the only thing still holding it together.
 
 ## Where a component's files go
 
@@ -95,19 +95,18 @@ utilities, types and contexts
 go](../../AGENTS.md#where-utilities-types-and-contexts-go) for the level to put
 them at.
 
-**Nothing nested is exported from `src/components/index.ts`.** That barrel is
-the `./components` subpath in `package.json`, so anything reachable through it
-is published API a consumer may depend on — and a subcomponent exported there is
-one nobody decided to ship. The same holds for `src/utils/index.ts` behind
-`./utils`: a component-local `utils/` folder is private, the package-level one
-is public surface.
+**Nothing nested is exported from `src/components/index.ts`.** `src/index.ts`
+re-exports that barrel with `export *`, so anything reachable through it is
+published API a consumer may depend on — and a subcomponent exported there is
+one nobody decided to ship. The same holds for `src/utils/index.ts`: a
+component-local `utils/` folder is private, the package-level one is public
+surface.
 
 **What two components share but nobody decided to ship goes in `src/internal/`,
 not `src/utils`.** The kind still picks the folder beneath it —
 `src/internal/utils/`, `src/internal/types/` — so `internal/` sorts by
-visibility and does not become a drawer of its own. It gets
-no barrel, no `exports` entry and no line in `vite.config.ts` or
-`tsconfig.build.json`. Whatever a component imports still lands in `dist/`, and
+visibility and does not become a drawer of its own. It gets no barrel and
+nothing re-exports it. Whatever a component imports still lands in `dist/`, and
 that is fine: the `exports` map has no wildcard, so no consumer can name the
 path. Moving a helper into `src/utils` is the decision to ship it, and it is
 made once, when the file is placed — not later, by adding a line to a barrel.
@@ -197,14 +196,19 @@ are decided here.
 - **`dist/styles.css` is an export path in `package.json`, so its filename is
   public API.** It is pinned via `build.lib.cssFileName`; nothing in the output
   may be content-hashed.
-- **What gets published is whatever the entry points reach.**
-  `tsconfig.build.json` narrows `include` to them, so stories and tests are
-  never in the program. The package has four — `src/index.ts` and the three
-  group barrels behind `./components`, `./primitives` and `./utils` — and they
-  are listed in **three** places that have to agree: `exports` in `package.json`,
-  `build.lib.entry` in `vite.config.ts`, `include` in `tsconfig.build.json`.
-  Miss the last one and the subpath ships without declarations, which nothing
-  fails on until a consumer imports it.
+- **What gets published is whatever `src/index.ts` reaches.**
+  `tsconfig.build.json` narrows `include` to it, so stories and tests are never
+  in the program. It is the package's one code entry and is named in **three**
+  places that have to agree: `exports` in `package.json`, `build.lib.entry` in
+  `vite.config.ts`, `include` in `tsconfig.build.json`. Miss the last one and
+  the package ships without declarations, which nothing fails on until a
+  consumer imports it.
+- **The group barrels are internal, and a new subpath is three lines or
+  nothing.** Only an entry survives the build as a file: Rollup folds a pure
+  re-export module into its importer, so `src/{components,primitives,utils}/index.ts`
+  emit nothing at all. An `exports` entry added on its own therefore points at a
+  file that does not exist — no build error, `ERR_MODULE_NOT_FOUND` at the
+  consumer. All three places or none.
 - **A new component or hook is exported from its group barrel, not from
   `src/index.ts`.** The root re-exports the groups with `export *`; exporting
   in both places is how a symbol ends up published twice.
@@ -235,9 +239,9 @@ configured in the `test` block of `vite.config.ts`, which keeps
   never reaches them; it is the helpers that leak. The folder sits inside `src`
   by choice — outside it, `rootDir` would have turned that mistake into a
   `TS6059` build failure instead of a silent one.
-- **A test helper may never go in `src/utils`.** That folder is the `./utils`
-  subpath export, so anything in it is published API by design rather than by
-  accident.
+- **A test helper may never go in `src/utils`.** That folder is re-exported
+  from `src/index.ts`, so anything in it is published API by design rather than
+  by accident.
 - Tests reach the folder through the `@tests` alias, declared in `test.alias` in
   `vite.config.ts` **and** in `tsconfig.json`'s `paths`. Both, or the editor and
   the runner disagree about the same import.

@@ -21,11 +21,12 @@ before starting rather than working from this page alone.
 primitive carries no `tone` and no `variant`, paints no filled surface, and
 names a relationship — `Stack`, `Text`, `Divider` — rather than an object.
 
-It comes first because it picks the folder, the barrel and the subpath, and
-because both groups are published: moving something across later is a breaking
-change for anyone who imported it from the group it left. Every step below reads
-the same in either folder; where the page says `src/components`, substitute
-`src/primitives` throughout if that is the answer here.
+It comes first because it picks the folder and the barrel. Both groups reach a
+consumer through the package root, so moving something across later breaks
+nobody — which is exactly why the folder has to be right: it is the only place
+the split is recorded. Every step below reads the same in either folder; where
+the page says `src/components`, substitute `src/primitives` throughout if that
+is the answer here.
 
 `src/primitives/Stack` is the worked example on that side, and `Button` on the
 other; the two folders read the same.
@@ -39,8 +40,8 @@ later means rewriting the component. The rule itself is in
 Prefer no directive. If a component needs state, consider whether the state can
 live in a hook the consumer calls, leaving the component itself universal.
 There is no `src/hooks` at the moment, so that means creating it: a barrel
-beside the hook, a `./hooks` entry in `exports`, `build.lib.entry` and
-`tsconfig.build.json`.
+beside the hook, re-exported from `src/index.ts` like the other groups. Nothing
+else — the package has one entry and one code `exports` path.
 
 ## 3. Create the folder
 
@@ -92,12 +93,18 @@ An arrow function. Props extend `ComponentPropsWithRef<'element'>` so
 `className`, `ref`, `id`, `aria-*` and handlers pass through, and `className` is
 appended with `cx`, never replaced.
 
-Two traps worth knowing before the compiler tells you:
+**The signature takes the props whole — `(props: <Name>Props)` — and the body
+destructures them, defaults included:**
 
-- A prop that collides with a DOM attribute of a different type needs `Omit`.
-  `title` is the common one — on a div it is the tooltip string, so a heading
-  prop called `title` must drop the DOM one.
-- Defaults go in the parameter list (`tone = 'accent'`), not in the body.
+```tsx
+export const Stack = (props: StackProps) => {
+  const { direction = 'column', gap = 4, className, ...rest } = props;
+```
+
+One trap worth knowing before the compiler tells you: a prop that collides with
+a DOM attribute of a different type needs `Omit`. `title` is the common one —
+on a div it is the tooltip string, so a heading prop called `title` must drop
+the DOM one.
 
 Variant unions belong here rather than in the stylesheet — write
 `type <Name>Size = 'sm' | 'md' | 'lg'`, then go back and annotate the stylesheet's
